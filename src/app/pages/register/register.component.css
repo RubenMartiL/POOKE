@@ -1,0 +1,211 @@
+@import url("https://fonts.googleapis.com/css2?family=Germania+One&display=swap");
+
+main {
+  width: 100vw;
+  height: 100vh;
+  background-color: #4d69cf;
+  color: #dadef2;
+  font-family: "Roboto", cursive;
+  font-size: 0.9rem;
+  overflow: hidden;
+}
+
+img {
+  border-radius: 1000px;
+  padding-top: 30%;
+  margin-top: -50%;
+  margin-bottom: 10%;
+  box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.4);
+  width: 100%;
+}
+
+div {
+  margin: 0 auto;
+  width: 25%;
+}
+
+h2 {
+  font-family: "Germania One", cursive;
+  text-align: center;
+  font-size: 3rem;
+}
+
+h5 {
+  font-family: "Roboto", cursive;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.forgot {
+  width: 95%;
+}
+
+button {
+  font-family: "Germania One", cursive;
+  text-align: center;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 0;
+  border-radius: 30px;
+  border-radius: 2px;
+  padding: 8px 0;
+  background: linear-gradient(to right, #273754, #3e4f95);
+  color: white;
+  margin: 0 auto;
+}
+
+input {
+  background: linear-gradient(to right, #c1c9ef, #8696e1);
+  border-radius: 10px;
+  border-radius: 2px;
+  border: 0;
+  padding: 11px 12.5px 10px 42.5px;
+  border-right: 2px solid white;
+  border-left: 2px solid white;
+  color: #3a6cb0;
+  font-family: "Roboto", cursive;
+  font-family: "Germania One", cursive;
+  font-size: 1rem;
+}
+
+button + label {
+  text-align: center;
+}
+
+button + label > b {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+div.input {
+    position: relative;
+}
+
+svg {
+  width: 16px;
+  fill: #3464ab;
+  position: absolute;
+  top: 50%; /* Mueve el SVG hacia la mitad superior del contenedor */
+  transform: translateY(-50%);
+  left: 15px;
+  z-index: 5;
+}
+
+@media (max-width: 1280px) {
+  div {
+    width: 50%;
+  }
+}
+
+@media (max-width: 820px) {
+  div {
+    width: 75%;
+  }
+}
+
+@media (max-width: 480px) {
+  div {
+    width: 100%;
+  }
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+/* Estilizar la etiqueta que está asociada con el checkbox */
+label[for="myCheckbox"] {
+  display: inline-block;
+  cursor: pointer;
+  padding-left: 25px;
+  position: relative;
+}
+
+/* Establecer el diseño del checkbox personalizado */
+label[for="myCheckbox"]:before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 1px;
+  position: absolute;
+  left: 0px;
+  top: 2px;
+}
+
+/* Establecer el estilo del marcador del checkbox personalizado */
+label[for="myCheckbox"]:after {
+  content: "\2713";
+  display: none;
+  width: 18px;
+  height: 18px;
+  color: #2d2d2d;
+  background-color: #fff;
+  border-radius: 1px;
+  text-align: center;
+  line-height: 18px;
+  position: absolute;
+  left: 0px;
+  top: 2px;
+}
+
+/* Cambiar el diseño del checkbox personalizado cuando se marca */
+input[type="checkbox"]:checked + label:before {
+  background-color: #3464ab;
+  border-color: #3464ab;
+}
+
+input[type="checkbox"]:checked + label:after {
+  display: block;
+}
+
+.error {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: "Roboto", cursive;
+  animation-name: nacer;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  background-color: #ee5c5c;
+  color: #dadef2;
+  border-radius: 2px;
+}
+
+@keyframes nacer {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.backButton {
+  border-radius: 100px;
+  width: 35px;
+  height: 35px;
+  border: 2px solid white;
+  position: absolute;
+  top: 2vw;
+  left: 2vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  background-color: #4d69cf;
+  cursor: pointer;
+}
+
+.backButton > span {
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  margin-top: -5px;
+  margin-left: -2px;
+}

@@ -1,0 +1,28 @@
+nav {
+    background: #7A6AA0;
+    width: 100vw;
+    height: 8vh;
+    padding: 2vh;
+}
+
+nav  * {
+    color: #fff;
+}
+
+.activeSection {
+    position: absolute;
+    width: 26vw;
+    height: 12vh;
+    padding-top: 1vh;
+    left: 37vw;
+    background: rgb(103, 88, 138);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 2rem;
+    text-transform: uppercase;
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+    font-weight: bold;
+    z-index: 5;
+}

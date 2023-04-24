@@ -1,0 +1,13 @@
+<nav class="d-flex justify-content-between align-items-center">
+    <span>Bienvenido <b>{{userLoged}}</b></span>
+    <div class="activeSection">
+        {{activeMenuHome}}
+    </div>
+    <div>
+        <button class="btn" (click)="navigation('home')">Home</button>
+        <button class="btn" (click)="navigation('battle')">Battle</button>
+        <button class="btn" (click)="navigation('team')">Equipo</button>
+        <button class="btn" (click)="navigation('pokedex')">Pokedex</button>
+        <button class="btn" (click)="logout()">Logout</button>
+    </div>
+</nav>

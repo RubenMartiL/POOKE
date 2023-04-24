@@ -1,0 +1,31 @@
+<main>
+    <div class="d-flex flex-column p-4 p-2 justify-content-center position-relative">
+        <img src="{{baseUrl}}assets/media/register.png" alt="">
+        <h2>Register</h2>
+        <h5>Create your account</h5>
+        <div *ngIf="error" class="error w-100 alert alert-danger mt-2 mb-2 p-2 ps-3" role="alert">
+            {{error}}
+        </div>
+        <div class="input mb-3 w-100">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
+            <input [(ngModel)]='user' autocomplete="new-password" type="text" name="nickname" id="nickname" class="w-100" placeholder="Nickname...">
+        </div>
+
+        <div class="input mb-3 w-100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/></svg>
+        <input [(ngModel)]='email' autocomplete="new-password" type="email" name="email" id="email" class="w-100" placeholder="Email adress...">
+        </div>
+        <div class="input mb-3 w-100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z"/></svg>
+        <input [(ngModel)]='pass' autocomplete="new-password" type="password" name="pass" id="pass" class="w-100" placeholder="Password...">
+        </div>
+
+        <div class="input mb-3 w-100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192V144C80 64.5 144.5 0 224 0s144 64.5 144 144v48h16c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64H80z"/></svg>
+        <input [(ngModel)]='pass2' autocomplete="new-password" type="password" name="pass2" id="pass2" class="w-100" placeholder="Confirm password...">
+        </div>
+        <button class="mt-4 mb-2 w-75" (touchstart)="register()" (click)="register()">Register</button>
+        <label>Already have an account? <b (touchstart)="login()" (click)="login()">Login</b></label>
+    </div>
+    <div (touchstart)="login()" (click)="login()" class="backButton"><span>&#x2039;</span></div>
+</main>
