@@ -922,6 +922,12 @@ input[type="text"] {
     align-items: center;
     margin-right: 8vh;
     text-transform: uppercase;
+    transition: all .5s ease;
+    cursor: pointer;
+}
+
+.homeMenu > ul > li:hover {
+    margin-top: -1vh;
 }
 
 .homeMenu > ul > li > img {
@@ -1005,11 +1011,26 @@ input[type="text"] {
 }
 
 .homeBattleButton {
-    width: 25vh;
+    width: 52vh;
     height: 18.47vh;
     background-image: url("../../../assets/media/home_buttonBattle.svg");
-    background-size: contain;
+    background-size: cover;
+    background-repeat: no-repeat;
     position: absolute;
     bottom: 10vh;
     right: 15vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10vh;
+    font-family: 'Germania One', cursive;
+    text-transform: uppercase;
+    color: #FBE45D;
+    text-shadow: 2px 2px 4px #000000;
+    transition: all .5s ease;
+    cursor: pointer;
+}
+
+.homeBattleButton:hover {
+    font-size: 11vh;
 }
