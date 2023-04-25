@@ -1,7 +1,45 @@
-<app-menu (activeMenu)="setSection($event)" [activeMenuHome]="activeSection"></app-menu>
+<!-- 
+    <app-menu (activeMenu)="setSection($event)" [activeMenuHome]="activeSection"></app-menu>
+-->
 
 <!-- HOME -->
-<section *ngIf="activeSection == 'home' " class="w-100 d-flex flex-column">
+<section *ngIf="activeSection == 'home' " class="homeSection">
+    <div class="homeAvatarMenu">
+        <div class="homeAvatarMenuMugshot">
+            <img src="{{baseUrl}}assets/media/mugshot.svg">
+        </div>
+        <div class="homeAvatarMenuInfo">
+            <p>Ruben</p>
+            <div class="homeAvatarMenuLvlBox">
+                <span>Lv.23</span>
+            </div>
+            <div class="homeAvatarMenuLvlBar">
+                <div class="homeAvatarMenuLvlBarFill"></div>
+            </div>
+        </div>
+    </div>
+    <div class="homeMenu">
+        <ul>
+            <li>
+                <img src="{{baseUrl}}assets/media/home_menuTeamIcon.svg">
+                <p>Team</p>
+            </li>
+            <li>
+                <img src="{{baseUrl}}assets/media/home_menuItemsIcon.svg">
+                <p>Items</p>
+            </li>
+            <li>
+                <img src="{{baseUrl}}assets/media/home_menuPokedexIcon.svg">
+                <p>Pokedex</p>
+            </li>
+            <li>
+                <img src="{{baseUrl}}assets/media/home_menuShopIcon.svg">
+                <p>Shop</p>
+            </li>
+        </ul>
+    </div>
+    <div class="homeBattleButton">Battle!</div>
+<!--
     <div class="d-flex flex-wrap">
         <div class="pokeballOpeningPokemon shadow" *ngFor="let pokemon of pokedexList; let i=index" [ngStyle]="{'background-color': getPokedexBgColor(pokemon)}">
             <div class="d-flex justify-content-between w-100 align-items-center">
@@ -25,6 +63,7 @@
         </div>
     </div>
     <button class="btn btn-primary w-25" (click)="generadorDePokemonsAleatorios()">Generar pokemon</button>
+-->
 </section>
 
 <!-- POKEDEX -->
@@ -640,6 +679,8 @@
     </div>
 </section>
 
-<div *ngIf="!pokedexCargada" class="w-100 d-flex justify-content-center">
-    <img src="{{baseUrl}}assets/media/loading2.gif" class="loadingImg">
-</div>
+<!--
+    <div *ngIf="!pokedexCargada" class="w-100 d-flex justify-content-center">
+        <img src="{{baseUrl}}assets/media/loading2.gif" class="loadingImg">
+    </div>
+-->
