@@ -6,7 +6,7 @@ import { environment as environmentProd } from 'src/environments/environment.pro
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
   baseUrl = (environment.production) ? environmentProd.baseUrl : environment.baseUrl;

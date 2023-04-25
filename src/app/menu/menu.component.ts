@@ -6,7 +6,7 @@ import { environment as environmentProd } from 'src/environments/environment.pro
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.css']
+  styleUrls: ['./menu.component.scss']
 })
 export class MenuComponent {
   baseUrl = (environment.production) ? environmentProd.baseUrl : environment.baseUrl;
