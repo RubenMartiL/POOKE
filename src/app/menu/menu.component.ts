@@ -13,7 +13,6 @@ export class MenuComponent {
   
   userLoged: string | null = '';
 
-  activeSection: string = 'home';
   @Input() activeMenuHome:string = '';
   @Output() activeMenu = new EventEmitter();
 
@@ -27,7 +26,6 @@ export class MenuComponent {
   }
 
   navigation = (seccion: string) => {
-    this.activeSection = seccion;
-    this.activeMenu.emit(this.activeSection);
+    this.activeMenu.emit(seccion);
   }
 }

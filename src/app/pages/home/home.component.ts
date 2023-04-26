@@ -43,7 +43,7 @@ export class HomeComponent {
   listadoPokemonsUsuarios: Array<any> = [];
   equipoPokemonsUsuarios: Array<any> = [];
 
-  activeSection: string = 'home';
+  activeSection: string = 'team';
 
   // POKEDEX //
   pokedexInputSearch: string = '';
@@ -69,6 +69,7 @@ export class HomeComponent {
   dragObject: any;
   dragIndex: number = -1;
   originalArray: any[] = [];
+  teamPestanya:string = 'abierta'
 
   // SHOP //
   pokeballOpening = false;
@@ -1085,4 +1086,27 @@ export class HomeComponent {
     }
       return "Please perform the function of a Pokemon Trainer following the rules listed below: Presentation Rules: 1. I will give you some context about the battle that is taking place. 2. The game output will always show a number of your choice of the election of your choice. 3. You will never write anything but a number. 4. The number will only be one digit. 5. You only choose one action from the ones I list Fundamental Game Mechanics: 1. Pokemon rules in combat. Refer back to these rules after every prompt. Start Battle, in the next message I will pass you the context of the battle. Wait the context of the battle like your pokemon, enemy pokemon and more. Wait more information."
     }
+
+  cerrarPestanyaTeam = () => {
+    console.log(this.teamPestanya)
+    if(this.teamPestanya == 'abierta'){
+      document.getElementById("pestanya1")?.classList.remove("teamPestanyaAbrirAnimation");
+      document.getElementById("pestanya2")?.classList.remove("teamPestanyaAbrirAnimation");
+      document.getElementById("pestanya1")?.classList.add("teamPestanyaCerrarAnimation");
+      document.getElementById("pestanya2")?.classList.add("teamPestanyaCerrarAnimation");
+      document.getElementsByClassName("teamEquipoBox")[0]?.classList.remove("teamEquipoBoxPequenoAnimacion");
+      document.getElementsByClassName("teamEquipoBox")[0]?.classList.add("teamEquipoBoxGrandeAnimacion");
+      this.teamPestanya = 'cerrada';
+    }else{
+      document.getElementById("pestanya1")?.classList.remove("teamPestanyaCerrarAnimation");
+      document.getElementById("pestanya2")?.classList.remove("teamPestanyaCerrarAnimation");
+      document.getElementById("pestanya1")?.classList.add("teamPestanyaAbrirAnimation");
+      document.getElementById("pestanya2")?.classList.add("teamPestanyaAbrirAnimation");
+      document.getElementsByClassName("teamEquipoBox")[0]?.classList.remove("teamEquipoBoxGrandeAnimacion");
+      document.getElementsByClassName("teamEquipoBox")[0]?.classList.add("teamEquipoBoxPequenoAnimacion");
+      this.teamPestanya = 'abierta';
+    }
+  }
+
 }
+

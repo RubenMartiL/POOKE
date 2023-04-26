@@ -1,11 +1,7 @@
-<!-- 
-    <app-menu (activeMenu)="setSection($event)" [activeMenuHome]="activeSection"></app-menu>
--->
-
 <!-- HOME -->
-<section *ngIf="activeSection == 'home' " class="homeSection">
+<section *ngIf="activeSection == 'home'" class="homeSection">
     <!-- PARTICULAS -->
-    <div class="container">
+    <div class="containerBox">
         <ng-container *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]">
           <div class="circle-container">
             <div class="circle"></div>
@@ -29,20 +25,20 @@
     </div>
     <div class="homeMenu">
         <ul>
-            <li>
-                <img src="{{baseUrl}}assets/media/home_menuTeamIcon.svg">
+            <li (click)="setSection('team')">
+                <img src="{{baseUrl}}assets/media/mega-bola.svg">
                 <p>Team</p>
             </li>
             <li>
-                <img src="{{baseUrl}}assets/media/home_menuItemsIcon.svg">
+                <img src="{{baseUrl}}assets/media/mochila.svg">
                 <p>Items</p>
             </li>
-            <li>
-                <img src="{{baseUrl}}assets/media/home_menuPokedexIcon.svg">
+            <li (click)="setSection('pokedex')">
+                <img src="{{baseUrl}}assets/media/pokedex.png">
                 <p>Pokedex</p>
             </li>
             <li>
-                <img src="{{baseUrl}}assets/media/home_menuShopIcon.svg">
+                <img src="{{baseUrl}}assets/media/pokebag.svg">
                 <p>Shop</p>
             </li>
         </ul>
@@ -76,9 +72,43 @@
 </section>
 
 <!-- POKEDEX -->
-<section *ngIf="activeSection == 'pokedex' " class="w-100 d-flex flex-column">
-    <div *ngIf="pokedexCargada">
-        <div class="d-flex align-items-center justify-content-between">
+<section *ngIf="activeSection == 'pokedex'">
+    <app-menu (activeMenu)="setSection($event)" [activeMenuHome]="activeSection"></app-menu>
+    <div class="sectionDownMenu">
+        <div class="d-flex align-items-center justify-content-end">
+            <input class="pokemonInPokedexTypeFilterSearch" type="text" placeholder="Search pokemon..." (keyup)="pokedexFilterSearch()" [(ngModel)]="pokedexInputSearch">
+            <div class="d-flex">
+                <div ngbTooltip="{{formatNamePokemonPokedex(tipo)}}" ngbTooltipDelay="{show: 1000, hide: 500}"
+                    (click)="pokedexFilterSearch(tipo)" *ngFor="let tipo of pokedexTipos"
+                    class="pokemonInPokedexTypeFilter"
+                    [ngClass]="{'pokemonInPokedexTypeFilterSelected': pokedexTiposSelected.indexOf(tipo) != -1}">
+                    <img height="100%" src="{{baseUrl}}assets/media/types/{{tipo}}.png">
+                </div>
+            </div>
+        </div>
+        <div class="sectionDownSubMenu">
+            <article class="pokemonInPokedex" *ngFor="let pokemon of pokedexList" >
+                <div class="w-100" class="pokemonInPokedexImg" (click)="goToPokemonDatos(pokemon,-1)"
+                    [ngStyle]="{'background-color': getPokedexBgColor(pokemon)}">
+                    <h4>{{formatNamePokemonPokedex(pokemon.name)}}</h4>
+                    <p>{{formatIdPokemonPokedex(pokemon.id)}}</p>
+                    <img *ngIf="comprobarPokemonCaptured(pokemon.id)" class="pokemonInPokedexCaptured"
+                        src="{{baseUrl}}assets/media/pokeball.png">
+                    <img *ngIf="!comprobarPokemonCaptured(pokemon.id)" class="pokemonInPokedexCaptured"
+                        src="{{baseUrl}}assets/media/pokeballOff.png">
+                    <img src="{{pokemon.sprites.other['official-artwork'].front_default}}">
+                    <div class="pokemonInPokedexTypesBox">
+                        <div *ngFor="let tipo of pokemon.types">
+                            <img src="{{baseUrl}}assets/media/types/{{tipo.type.name}}.png">
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+    <!--
+        <div *ngIf="pokedexCargada">
+            <div class="d-flex align-items-center justify-content-between">
             <input type="text" placeholder="Search pokemon..." (keyup)="pokedexFilterSearch()"
                 [(ngModel)]="pokedexInputSearch">
             <div class="d-flex">
@@ -111,6 +141,7 @@
             </article>
         </div>
     </div>
+-->
 </section>
 
 <!-- BATTLE -->
@@ -452,9 +483,63 @@
 </section>
 
 <!-- TEAM -->
-<section *ngIf="activeSection == 'team'" class="w-100 d-flex flex-column">
-    <div *ngIf="pokedexCargada">
-        <ul class="d-flex flex-wrap" (dragover)="onDragOver($event)"
+<section *ngIf="activeSection == 'team'">
+    <app-menu (activeMenu)="setSection($event)" [activeMenuHome]="activeSection"></app-menu>
+    <div class="sectionDownMenu teamBackground position-relative">
+        <div class="teamPestanya" id="pestanya1">
+        </div>
+        <div class="teamPestanyaCerrar" id="pestanya2" (click)="cerrarPestanyaTeam()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg>
+        </div>
+        <div class="teamEquipoBox">
+            <div class="teamEquipoPokemonBox">
+                <!-- 
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/99.png">
+                -->
+                <img src="{{baseUrl}}assets/media/27.svg">
+                <div class="teamEquipoPokemonShadow"></div>
+            </div>
+            <div class="teamEquipoPokemonBox">
+                <!-- 
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/99.png">
+                -->
+                <img src="{{baseUrl}}assets/media/99.svg">
+                <div class="teamEquipoPokemonShadow"></div>
+            </div>
+            <div class="teamEquipoPokemonBox">
+                <!-- 
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/99.png">
+                -->
+                <img src="{{baseUrl}}assets/media/99.svg">
+                <div class="teamEquipoPokemonShadow"></div>
+            </div>
+            <div class="teamEquipoPokemonBox">
+                <!-- 
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/99.png">
+                -->
+                <img src="{{baseUrl}}assets/media/99.svg">
+                <div class="teamEquipoPokemonShadow"></div>
+            </div>
+            <div class="teamEquipoPokemonBox">
+                <!-- 
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/99.png">
+                -->
+                <img src="{{baseUrl}}assets/media/9.svg">
+                <div class="teamEquipoPokemonShadow"></div>
+            </div>
+            <div class="teamEquipoPokemonBox">
+                <!-- 
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/99.png">
+                -->
+                <img src="{{baseUrl}}assets/media/99.svg">
+                <div class="teamEquipoPokemonShadow"></div>
+            </div>
+        </div>
+    </div>
+</section>
+    <!--
+        <div *ngIf="pokedexCargada">
+            <ul class="d-flex flex-wrap" (dragover)="onDragOver($event)"
             (drop)="onDrop($event, equipoPokemonsUsuarios, pokemonBanquillo)">
             <li class="pokemonInPokedex" *ngFor="let pokemon of equipoPokemonsUsuarios; let i = index" draggable="true"
                 (dragstart)="onDragStart($event, pokemon, i, equipoPokemonsUsuarios)">
@@ -464,7 +549,7 @@
                     <h4 *ngIf="!pokemon.unique.name">{{formatNamePokemonPokedex(pokemon.name)}}</h4>
                     <p>{{formatIdPokemonPokedex(pokemon.id)}}</p>
                     <img *ngIf="comprobarPokemonCaptured(pokemon.id)" class="pokemonInPokedexCaptured"
-                        src="{{baseUrl}}assets/media/pokeball.png">
+                    src="{{baseUrl}}assets/media/pokeball.png">
                     <img *ngIf="!comprobarPokemonCaptured(pokemon.id)" class="pokemonInPokedexCaptured"
                         src="{{baseUrl}}assets/media/pokeballOff.png">
                     <img id="{{i}}" src="{{pokemon.sprites.other['official-artwork'].front_default}}">
@@ -481,10 +566,10 @@
         </ul>
         <div class="pokemonBanquillo">
             <ul class="d-flex flex-wrap" (dragover)="onDragOver($event)"
-                (drop)="onDrop($event, pokemonBanquillo, equipoPokemonsUsuarios)">
-                <li class="w-100" style="height: 40vh;" *ngIf="pokemonBanquillo.length <= 0" draggable="true"></li>
-                <li class="pokemonInPokedex" *ngFor="let pokemon of pokemonBanquillo; let i = index" draggable="true"
-                    (dragstart)="onDragStart($event, pokemon, i, pokemonBanquillo)">
+            (drop)="onDrop($event, pokemonBanquillo, equipoPokemonsUsuarios)">
+            <li class="w-100" style="height: 40vh;" *ngIf="pokemonBanquillo.length <= 0" draggable="true"></li>
+            <li class="pokemonInPokedex" *ngFor="let pokemon of pokemonBanquillo; let i = index" draggable="true"
+            (dragstart)="onDragStart($event, pokemon, i, pokemonBanquillo)">
                     <div class="w-100 h-100" class="pokemonInPokedexImg"
                         [ngStyle]="{'background-color': getPokedexBgColor(pokemon)}">
                         <h4 *ngIf="pokemon.unique.name">{{formatNamePokemonPokedex(pokemon.unique.name)}}</h4>
@@ -493,7 +578,7 @@
                         <img *ngIf="comprobarPokemonCaptured(pokemon.id)" class="pokemonInPokedexCaptured"
                             src="{{baseUrl}}assets/media/pokeball.png">
                         <img *ngIf="!comprobarPokemonCaptured(pokemon.id)" class="pokemonInPokedexCaptured"
-                            src="{{baseUrl}}assets/media/pokeballOff.png">
+                        src="{{baseUrl}}assets/media/pokeballOff.png">
                         <img src="{{pokemon.sprites.other['official-artwork'].front_default}}">
                         <div class="pokemonInPokedexTypesBox">
                             <div *ngFor="let tipo of pokemon.types">
@@ -505,7 +590,8 @@
             </ul>
         </div>
     </div>
-</section>
+-->
+
 
 <!-- SHOP -->
 <section *ngIf="activeSection == 'shop'" class="w-100 d-flex flex-column">

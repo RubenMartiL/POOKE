@@ -1,28 +1,41 @@
 nav {
-    background: #7A6AA0;
+    background: var(--main-bg-color);
     width: 100vw;
-    height: 8vh;
-    padding: 2vh;
-}
-
-nav  * {
-    color: #fff;
-}
-
-.activeSection {
-    position: absolute;
-    width: 26vw;
-    height: 12vh;
-    padding-top: 1vh;
-    left: 37vw;
-    background: rgb(103, 88, 138);
+    height: 12.5vh;
     display: flex;
-    justify-content: center;
+    position: relative;
+    z-index: 100;
+}
+
+.backButton {
+    width: 20vh;
+    height: 16vh;
+    border-bottom-right-radius: 25px;
+    background-color: #000;
+    display: flex;
     align-items: center;
-    color: #fff;
-    font-size: 2rem;
-    text-transform: uppercase;
-    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
-    font-weight: bold;
-    z-index: 5;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.backButton > svg {
+    height: 34%;
+    fill: var(--second-bg-color);
+    margin-left: -1vh;
+}
+
+.backButton > img {
+    height: 40%;
+    margin-left: -3vh;
+}
+
+p {
+    margin-left: 3vh;
+    color: var(--second-bg-color);
+    font-size: 6vh;
+    font-family: 'Germania One', cursive;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
