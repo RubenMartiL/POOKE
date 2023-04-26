@@ -1116,7 +1116,6 @@ input[type="text"] {
 .teamEquipoBox {
     width: 45vw;
     height: 50%;
-    background: rgba(0, 0, 0, .8);
     position: absolute;
     bottom: 0;
     left: 0;
@@ -1146,9 +1145,7 @@ input[type="text"] {
 }
 
 .teamEquipoPokemonBox > img {
-    width: 20vh;
-    height: min-content;
-    bottom: 1.5vh;
+    bottom: 1vh;
     position: absolute;
     z-index: 2;
 }
@@ -1163,6 +1160,7 @@ input[type="text"] {
     height: 5.5vh;
     width: calc(5.5vh * 5.1515);
     z-index: 1;
+    opacity: .6;
 }
 
 /* CERRAR EQUIPO */

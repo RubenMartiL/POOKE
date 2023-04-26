@@ -1108,5 +1108,9 @@ export class HomeComponent {
     }
   }
 
+  getPokemonImgVH = (height:number) => {
+    return (20 - (.8 * (13 - height)))+"vh";
+  }
+
 }
 
