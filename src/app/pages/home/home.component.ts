@@ -217,8 +217,18 @@ export class HomeComponent {
     return data;
   }
 
-  setSection = (seccion: string) => {
+  setSection = async(seccion: string) => {
     this.activeSection = seccion;
+    if(seccion == 'team'){
+      console.log(this.pokemonBanquillo)
+      this.listadoPokemonsUsuarios = [];
+      this.equipoPokemonsUsuarios = [];
+      this.pokemonBanquillo = [];
+      
+      await this.setUserPokemons();
+      await this.getUserTeam();
+      await this.getUserBanquillo();
+    }
   }
 
   formatIdPokemonPokedex = (id: number) => {
@@ -547,13 +557,18 @@ export class HomeComponent {
     let arrayPosiciones: Array<any> = [];
     if(this.originalArray !== targetArray && this.dragObject != null) {
       if(this.equipoPokemonsUsuarios.length < 6 && targetArray == this.equipoPokemonsUsuarios){
-        this.originalArray.splice(this.dragIndex, 1);
-        targetArray.splice(targetArray.length, 0, this.dragObject);
-        for(let index in this.equipoPokemonsUsuarios){
-          let indice:number = parseInt(index + 1);
-          arrayPosiciones.push(indice);
-        }
-        this.guardarEquipoEnBBDD(arrayPosiciones);
+        document.getElementById('banca'+this.dragIndex.toString())?.classList.add("pokemonOutBanquillo")
+        
+        setTimeout(() => {
+          this.originalArray.splice(this.dragIndex, 1);
+          targetArray.splice(targetArray.length, 0, this.dragObject);
+          for(let index in this.equipoPokemonsUsuarios){
+            let indice:number = parseInt(index + 1);
+            arrayPosiciones.push(indice);
+          }
+          this.guardarEquipoEnBBDD(arrayPosiciones);
+        },500)
+
       }else if(targetArray != this.equipoPokemonsUsuarios){
         this.originalArray.splice(this.dragIndex, 1);
         targetArray.splice(targetArray.length, 0, this.dragObject);
@@ -582,9 +597,11 @@ export class HomeComponent {
     }
 
     // reset the drag variables
+    setTimeout(() => {
     this.dragObject = null;
     this.dragIndex = -1;
     this.originalArray = [];
+    },600);
   }
 
   getMoves = async(idMove:number) => {
@@ -1088,29 +1105,16 @@ export class HomeComponent {
     }
 
   cerrarPestanyaTeam = () => {
-    console.log(this.teamPestanya)
-    if(this.teamPestanya == 'abierta'){
-      document.getElementById("pestanya1")?.classList.remove("teamPestanyaAbrirAnimation");
-      document.getElementById("pestanya2")?.classList.remove("teamPestanyaAbrirAnimation");
-      document.getElementById("pestanya1")?.classList.add("teamPestanyaCerrarAnimation");
-      document.getElementById("pestanya2")?.classList.add("teamPestanyaCerrarAnimation");
-      document.getElementsByClassName("teamEquipoBox")[0]?.classList.remove("teamEquipoBoxPequenoAnimacion");
-      document.getElementsByClassName("teamEquipoBox")[0]?.classList.add("teamEquipoBoxGrandeAnimacion");
-      this.teamPestanya = 'cerrada';
-    }else{
-      document.getElementById("pestanya1")?.classList.remove("teamPestanyaCerrarAnimation");
-      document.getElementById("pestanya2")?.classList.remove("teamPestanyaCerrarAnimation");
-      document.getElementById("pestanya1")?.classList.add("teamPestanyaAbrirAnimation");
-      document.getElementById("pestanya2")?.classList.add("teamPestanyaAbrirAnimation");
-      document.getElementsByClassName("teamEquipoBox")[0]?.classList.remove("teamEquipoBoxGrandeAnimacion");
-      document.getElementsByClassName("teamEquipoBox")[0]?.classList.add("teamEquipoBoxPequenoAnimacion");
-      this.teamPestanya = 'abierta';
-    }
+    this.teamPestanya = (this.teamPestanya == 'abierta')?'cerrada':'abierta';
   }
 
   getPokemonImgVH = (height:number) => {
+    if(height > 17){ height = 17; }
     return (20 - (.8 * (13 - height)))+"vh";
   }
 
+  getUser = () => {
+    return localStorage.getItem("login")
+  }
 }
 

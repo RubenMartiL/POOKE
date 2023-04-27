@@ -1,5 +1,5 @@
 <!-- HOME -->
-<section *ngIf="activeSection == 'home'" class="homeSection">
+<section [ngClass]="{'invisible': activeSection != 'home'}" [style.z-index]="activeSection == 'home' ? 5 : 1" class="homeSection">
     <!-- PARTICULAS -->
     <div class="containerBox">
         <ng-container *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]">
@@ -14,7 +14,7 @@
             <img src="{{baseUrl}}assets/media/mugshots/083 - Farfetch'd [13].png">
         </div>
         <div class="homeAvatarMenuInfo">
-            <p>Ruben</p>
+            <p>{{getUser()}}</p>
             <div class="homeAvatarMenuLvlBox">
                 <span>Lv.23</span>
             </div>
@@ -72,7 +72,7 @@
 </section>
 
 <!-- POKEDEX -->
-<section *ngIf="activeSection == 'pokedex'">
+<section [ngClass]="{'invisible': activeSection != 'pokedex'}" [style.z-index]="activeSection == 'pokedex' ? 5 : 1">
     <app-menu (activeMenu)="setSection($event)" [activeMenuHome]="activeSection"></app-menu>
     <div class="sectionDownMenu">
         <div class="d-flex align-items-center justify-content-end">
@@ -483,20 +483,41 @@
 </section>
 
 <!-- TEAM -->
-<section *ngIf="activeSection == 'team'">
+<section [ngClass]="{'invisible': activeSection != 'team'}" [style.z-index]="activeSection == 'team' ? 5 : 1">
     <app-menu (activeMenu)="setSection($event)" [activeMenuHome]="activeSection"></app-menu>
     <div class="sectionDownMenu teamBackground position-relative">
-        <div class="teamPestanya" id="pestanya1">
+        <div class="teamPestanya" id="pestanya1" [ngClass]="{'teamPestanyaAbrirAnimation': teamPestanya == 'abierta', 'teamPestanyaCerrarAnimation': teamPestanya == 'cerrada'}" (dragover)="onDragOver($event)" (drop)="onDrop($event, pokemonBanquillo, equipoPokemonsUsuarios)" >
+        
+            <div>
+                <h2 class="teamPestanyaTitle">YOUR POKEMONS</h2>
+            </div>
+            <div class="w-100 d-flex flex-wrap">
+                <div class="pokeballOpeningPokemon mini shadow" *ngFor="let pokemon of pokemonBanquillo; let i = index" id="banca{{i}}" [ngStyle]="{'background-color': getPokedexBgColor(pokemon)}" draggable="true" (dragstart)="onDragStart($event, pokemon, i, pokemonBanquillo)">
+                    <div class="d-flex flex-column miniTypes" style="height: 40px;">
+                        <img *ngFor="let tipo of pokemon.types" class="typeIcon shadow" src="{{baseUrl}}assets/media/types/{{tipo.type.name}}.png">
+                    </div>
+                    <div class="position-absolute w-100 h-100 d-flex justify-content-center align-items-center overflow-hidden">
+                        <img class="miniimg" src="{{baseUrl}}assets/media/pokemon/{{pokemon.id}}.png">
+                    </div>
+                    <h4 class="mininame">{{formatNamePokemonPokedex(pokemon.name)}}</h4>
+                    <div class="stats ministats">
+                        <h4 class="lvl minilvl"><span>Lv.</span>{{pokemon.unique.lvl}}</h4>
+                        <img src="{{baseUrl}}assets/media/stats/stars.svg">
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="teamPestanyaCerrar" id="pestanya2" (click)="cerrarPestanyaTeam()">
+        <div class="teamPestanyaCerrar" id="pestanya2" [ngClass]="{'teamPestanyaAbrirAnimation': teamPestanya == 'abierta', 'teamPestanyaCerrarAnimation': teamPestanya == 'cerrada'}" (click)="cerrarPestanyaTeam()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg>
         </div>
-        <div class="teamEquipoBox">
-            <div *ngFor="let pokemon of equipoPokemonsUsuarios; let i = index" class="teamEquipoPokemonBox">
-                <img src="{{baseUrl}}assets/media/pokemon/{{pokemon.id}}.png" [ngStyle]="{'height': getPokemonImgVH(pokemon.height)}">
+        <div class="teamEquipoBox" [ngClass]="{'teamEquipoBoxPequenoAnimacion': teamPestanya == 'abierta', 'teamEquipoBoxGrandeAnimacion': teamPestanya == 'cerrada'}" (dragover)="onDragOver($event)" (drop)="onDrop($event, equipoPokemonsUsuarios, pokemonBanquillo)">
+            <div *ngFor="let pokemon of equipoPokemonsUsuarios; let i = index" class="teamEquipoPokemonBox" draggable="true"(dragstart)="onDragStart($event, pokemon, i, equipoPokemonsUsuarios)">
+                <img class="pokemonInBanquillo" id="{{i}}" src="{{baseUrl}}assets/media/pokemon/{{pokemon.id}}.png" [ngStyle]="{'height': getPokemonImgVH(pokemon.height)}">
                 <div class="teamEquipoPokemonShadow"></div>
             </div>
-            
+            <div class="teamEquipoPokemonBox" *ngFor="let pokemon of [].constructor(6-equipoPokemonsUsuarios.length); let i = index" draggable="true" (dragstart)="onDragStart($event, pokemon, i, pokemonBanquillo)"> 
+                <div class="teamEquipoPokemonShadow"></div>
+            </div>
         </div>
     </div>
 </section>
