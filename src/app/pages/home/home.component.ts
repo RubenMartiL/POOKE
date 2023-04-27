@@ -43,7 +43,7 @@ export class HomeComponent {
   listadoPokemonsUsuarios: Array<any> = [];
   equipoPokemonsUsuarios: Array<any> = [];
 
-  activeSection: string = 'team';
+  activeSection: string = 'home';
 
   // POKEDEX //
   pokedexInputSearch: string = '';
@@ -69,7 +69,7 @@ export class HomeComponent {
   dragObject: any;
   dragIndex: number = -1;
   originalArray: any[] = [];
-  teamPestanya:string = 'abierta'
+  teamPestanya:string = 'cerrada'
 
   // SHOP //
   pokeballOpening = false;
@@ -228,6 +228,10 @@ export class HomeComponent {
       await this.setUserPokemons();
       await this.getUserTeam();
       await this.getUserBanquillo();
+    }
+
+    if(seccion == 'home'){
+      this.teamPestanya = 'cerrada'
     }
   }
 
