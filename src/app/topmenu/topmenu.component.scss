@@ -1,0 +1,101 @@
+ul {
+    margin: 0;
+    margin-right: 2.5vh;
+    padding: 0;
+    list-style: none;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 5;
+}
+
+li {
+    margin-right: 2.5vh;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+li > img {
+    height: 3vh;
+}
+
+.moneyGang {
+    height: 100%;
+    padding: .5vh 3vh;
+    border-radius: 10px;
+    font-size: 2.25vh;
+    font-family: 'Germania One', cursive;
+    position: relative;
+    width: 15vh;
+    display: flex;
+    justify-content: center;
+}
+
+.moneyGangIcon {
+    position: absolute;
+    left: -1.5vh;
+    top: 22.5%;
+    height: 55% !important;
+}
+
+.toggleMenu {
+    position: absolute;
+    right: 2.5vh;
+    top: 5vh;
+    background: var(--second-bg-color);
+    animation-name: openedMenu;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    font-family: 'Germania One', cursive;
+    font-size: 2.25vh;
+    padding: 0 4vh;
+    border-radius: 3px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 0.4vh solid white;
+    transition: all .5s ease;
+}
+
+.toggleMenu:hover {
+    background: rgb(224, 224, 224);
+}
+
+.closeMenu {
+    animation-name: closeMenu;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+}
+
+a {
+    color: var(--main-bg-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@keyframes openedMenu {
+    0% {
+        opacity: 0;
+        height: 0;
+    }
+
+    100% {
+        height: 5vh;
+        opacity: 1;
+    }
+}
+
+@keyframes closeMenu {
+    100% {
+        opacity: 0;
+        height: 0;
+    }
+
+    0% {
+        height: 5vh;
+        opacity: 1;
+    }
+}

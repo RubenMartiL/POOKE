@@ -162,7 +162,8 @@ input[type="checkbox"]:checked + label:after {
   display: block;
 }
 
-.error {
+.error,
+.success {
   font-size: 0.8rem;
   font-weight: 600;
   font-family: "Roboto", cursive;
@@ -172,6 +173,11 @@ input[type="checkbox"]:checked + label:after {
   background-color: #ee5c5c;
   color: #dadef2;
   border-radius: 2px;
+}
+
+.success {
+  background-color: rgb(209, 231, 221);
+  color: #424242;
 }
 
 @keyframes nacer {

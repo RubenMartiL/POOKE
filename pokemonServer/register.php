@@ -5,6 +5,7 @@ $conexion = $db->conexion();
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 $datos = json_decode(file_get_contents('php://input'),true);
+$hash = password_hash($datos['pass'], PASSWORD_DEFAULT);
 
 if($datos['pass'] != $datos['pass2']){
     echo json_encode(false);
@@ -29,7 +30,7 @@ if(!preg_match('/\S+/', $datos['pass']) || !preg_match('/\S+/', $datos['pass2'])
 $consulta = $conexion->prepare('INSERT INTO `users` (`id`, `nickname`, `password`, `email`, `creationDate`) VALUES (NULL, ?, ?, ?, ?); ');
 $resultado = $consulta->execute([
     $datos['user'],
-    $datos['pass'],
+    $hash,
     $datos['email'],
     date('Y-m-d H:i:s')
 ]);

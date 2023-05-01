@@ -10,20 +10,12 @@ import { environment as environmentProd } from 'src/environments/environment.pro
 })
 export class MenuComponent {
   baseUrl = (environment.production) ? environmentProd.baseUrl : environment.baseUrl;
-  
-  userLoged: string | null = '';
 
+  @Input() userLoged:any;
   @Input() activeMenuHome:string = '';
   @Output() activeMenu = new EventEmitter();
 
-  constructor(private router: Router) {
-    this.userLoged = localStorage.getItem('login');
-  }
-
-  logout = () => {
-    localStorage.removeItem("login");
-    this.router.navigate([this.baseUrl+'']);
-  }
+  constructor(private router: Router) {}
 
   navigation = (seccion: string) => {
     this.activeMenu.emit(seccion);

@@ -13,7 +13,7 @@ $resultado = $consulta->execute([
 $datosSacados = $consulta->fetchAll();
 $idUsuario = $datosSacados[0]['id'];
 
-$consulta = $conexion->prepare("INSERT INTO userteam (id, id_user, id_pokemon,position) VALUES (NULL, ?, ?, ?); ");
+$consulta = $conexion->prepare("INSERT INTO userTeam (id, id_user, id_pokemon,position) VALUES (NULL, ?, ?, ?); ");
 $resultado = $consulta->execute([
     $idUsuario,
     $datos['pokemon'],

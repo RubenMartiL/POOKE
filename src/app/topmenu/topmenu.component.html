@@ -1,0 +1,28 @@
+<ul>
+    <li class="moneyGang" [ngStyle]="{
+        'background-color': activeSection == 'home' ? '#1B1B1B': 'var(--second-bg-color)',
+        'color': activeSection == 'home' ? 'var(--second-bg-color)' : '#1B1B1B',
+        'fill': activeSection == 'home' ? 'var(--second-bg-color)' : '#1B1B1B'
+    }">
+        <img class="moneyGangIcon" src="{{baseUrl}}assets/media/topMenu_diamondIcon.svg">
+        {{userLoged.money}}
+    </li>
+    
+    <!-- 
+    <li>
+        <img *ngIf="activeSection == 'home'" src="{{baseUrl}}assets/media/topMenu_notificationIconBlack.svg">
+        <img *ngIf="activeSection !== 'home'" src="{{baseUrl}}assets/media/topMenu_notificationIcon.svg">
+    </li>
+    -->
+
+    <li (click)="toggleMenu()">
+        <img *ngIf="activeSection == 'home'" src="{{baseUrl}}assets/media/topMenu_menuIconBlack.svg">
+        <img *ngIf="activeSection !== 'home'" src="{{baseUrl}}assets/media/topMenu_menuIcon.svg">
+    </li>
+
+    <a (click)="logout()">
+        <div *ngIf="openMenu" id="logoutButton" class="toggleMenu">
+            Logout
+        </div>
+    </a>
+</ul>

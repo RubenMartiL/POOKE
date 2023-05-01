@@ -13,7 +13,7 @@ $resultado = $consulta->execute([
 $datosSacados = $consulta->fetchAll();
 $idUsuario = $datosSacados[0]['id'];
 
-$consulta = $conexion->prepare('SELECT * FROM userteam WHERE id_user = ? ORDER BY position ASC');
+$consulta = $conexion->prepare('SELECT * FROM userTeam WHERE id_user = ? ORDER BY position ASC');
 $resultado = $consulta->execute([
     $idUsuario,
 ]);

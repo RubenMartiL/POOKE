@@ -13,12 +13,16 @@ $resultado = $consulta->execute([
 $datosSacados = $consulta->fetchAll();
 $idUsuario = $datosSacados[0]['id'];
 
-$consulta = $conexion->prepare('SELECT * FROM pokemonuser WHERE id_user = ?');
+$consulta = $conexion->prepare('SELECT * FROM pokemonUser WHERE id_user = ?');
 $resultado = $consulta->execute([
     $idUsuario,
 ]);
 
 $datosSacados = $consulta->fetchAll(PDO::FETCH_ASSOC);
-echo json_encode($datosSacados);
+if(count($datosSacados) > 0){
+    echo json_encode($datosSacados);
+}else{
+    echo json_encode(false);
+}
 
 ?>

@@ -38,7 +38,7 @@ export class HomeComponent {
   baseUrl = (environment.production) ? environmentProd.baseUrl : environment.baseUrl;
   backendUrl = (environment.production) ? environmentProd.backendUrl : environment.backendUrl;
   
-  userLoged: string | null = '';
+  userLoged:any;
   pokemonList: Array<any> = [];
   listadoPokemonsUsuarios: Array<any> = [];
   equipoPokemonsUsuarios: Array<any> = [];
@@ -73,6 +73,8 @@ export class HomeComponent {
 
   // SHOP //
   pokeballOpening = false;
+  shopPokemon: any;
+  shopOpening:boolean = false;
 
   // BATTLE //
   inBattle: boolean = false;
@@ -103,13 +105,18 @@ export class HomeComponent {
   battle_priority: string = '';
   @ViewChildren('combatTooltips') combatTooltips: ElementRef[] = [];;
   
-  constructor(private chatgpt:ChatGptApiService, private elementRef: ElementRef, private renderer: Renderer2){}
+  constructor(private chatgpt:ChatGptApiService, private elementRef: ElementRef, private renderer: Renderer2){
+    const loginData = localStorage.getItem('login');
+    if (loginData !== null) {
+      this.userLoged = JSON.parse(loginData);
+    }else{
+      this.userLoged = '';
+    }
+  }
 
   async ngOnInit() {
-    console.log('environment.production:', environment.production);
-    console.log('baseUrl:', this.baseUrl);
-    
-    this.userLoged = localStorage.getItem('login');
+    //console.log('environment.production:', environment.production);
+    //console.log('baseUrl:', this.baseUrl);
     await this.setAllPokemons();
     await this.setUserPokemons();
     await this.getUserTeam();
@@ -139,7 +146,7 @@ export class HomeComponent {
   setUserPokemons = async () => {
     const urls = [this.backendUrl+'getUserPokemons.php'];
     const fetchPromises = urls.map(async (url) => {
-      const response = await fetch(url, { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged }) });
+      const response = await fetch(url, { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
       const data = await response.json();
       const pokemonDetailsPromises = data.map(async (pokemon: any) => {
         const pokemonDetails = this.listadoPokemonsUsuarios.push(pokemon);
@@ -155,7 +162,7 @@ export class HomeComponent {
     let userTeam: Array<any> = [];
     const urls = [this.backendUrl+'getUserTeam.php'];
     const fetchPromises = urls.map(async (url) => {
-      const response = await fetch(url, { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged }) });
+      const response = await fetch(url, { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
       const data = await response.json();
       const pokemonDetailsPromises = data.map(async (pokemon: any) => {
         const pokemonDetails = await this.getUserPokemonById(pokemon.id_pokemon);
@@ -177,16 +184,15 @@ export class HomeComponent {
     let userBanquillo: Array<any> = [];
     const urls = [this.backendUrl+'getUserPokemons.php'];
     const fetchPromises = urls.map(async (url) => {
-      const response = await fetch(url, { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged }) });
+      const response = await fetch(url, { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
       const data = await response.json();
       return data;
     });
     await Promise.all(fetchPromises)
       .then(data => {
         data[0].forEach(async (pokemon:any) => {
-          const response = await fetch(this.backendUrl+'getUserTeam.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged }) });
+          const response = await fetch(this.backendUrl+'getUserTeam.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
           const data = await response.json();
-
           let pokemonEsta = data.find((pokemonEncontrado:any) => pokemon.id == pokemonEncontrado.id_pokemon);
           if(!pokemonEsta){
             let pokemonApi = await this.getPokemonById(pokemon.id_pokemon);
@@ -220,7 +226,6 @@ export class HomeComponent {
   setSection = async(seccion: string) => {
     this.activeSection = seccion;
     if(seccion == 'team'){
-      console.log(this.pokemonBanquillo)
       this.listadoPokemonsUsuarios = [];
       this.equipoPokemonsUsuarios = [];
       this.pokemonBanquillo = [];
@@ -621,10 +626,10 @@ export class HomeComponent {
   }
 
   guardarEquipoEnBBDD = async(arrayPosiciones:Array<any>) => {
-    const responseDelete = await fetch(this.backendUrl+'deleteUserTeam.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged}) });
+    const responseDelete = await fetch(this.backendUrl+'deleteUserTeam.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname}) });
     const dataDelete = await responseDelete.json();
     this.equipoPokemonsUsuarios.forEach(async(pokemon,index) => {
-      const response = await fetch(this.backendUrl+'updateUserTeam.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged, 'pokemon': pokemon.unique.id_pokemon, 'position': arrayPosiciones[index]}) });
+      const response = await fetch(this.backendUrl+'updateUserTeam.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'pokemon': pokemon.unique.id_pokemon, 'position': arrayPosiciones[index]}) });
       const data = await response.json();
     })
   }
@@ -1117,8 +1122,63 @@ export class HomeComponent {
     return (20 - (.8 * (13 - height)))+"vh";
   }
 
-  getUser = () => {
-    return localStorage.getItem("login")
+  openPack = async(pack:number) => {
+    if(this.userLoged.packsfree > 0){
+      const responseMoney = await fetch(this.backendUrl+'newFreePacks.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname}) });
+      const dataMoney = await responseMoney.json();
+    }else if(this.userLoged.money >= 500){
+      const responseMoney = await fetch(this.backendUrl+'newMoney.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'money': 500}) });
+      const dataMoney = await responseMoney.json();
+    }else{
+      return;
+    }
+
+    let numeroAleatorio = Math.floor(Math.random() * this.pokemonList.length);
+    document.getElementsByClassName("shopOpeningBlackWindow")[0].classList.remove("d-none");
+    this.shopPokemon = this.pokemonList[numeroAleatorio];
+    this.shopOpening = true;
+    let arrayMoves:Array<number> = [];
+    if(this.shopPokemon.moves.length > 4){
+      if(this.shopPokemon.moves.length > 10){
+        while(arrayMoves.length < 4){
+          let random = Math.floor(Math.random() * 10);
+          !arrayMoves.includes(random) ? arrayMoves.push(random) : null;
+        }
+      }else{
+        while(arrayMoves.length < 4){
+          let random = Math.floor(Math.random() * this.shopPokemon.moves.length);
+          !arrayMoves.includes(random) ? arrayMoves.push(random) : null;
+        }
+      }
+    }else if(this.shopPokemon.moves.length == 4){
+      arrayMoves.push(0);
+      arrayMoves.push(1);
+      arrayMoves.push(2);
+      arrayMoves.push(3);
+    }else{
+      arrayMoves.push(0);
+      arrayMoves.push(0);
+      arrayMoves.push(0);
+      arrayMoves.push(0);
+    }
+    const newPokemon = await fetch(this.backendUrl+'addPokemonToUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'pokemonId': this.shopPokemon.id, 'move1' : arrayMoves[0], 'move2' : arrayMoves[1], 'move3' : arrayMoves[2], 'move4' : arrayMoves[3]}) });
+    const datanewPokemon = await newPokemon.json();
+
+    const response = await fetch(this.backendUrl+'getUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname}) });
+    const data = await response.json();
+    localStorage.setItem("login",JSON.stringify(data[0]))
+    let loginData = localStorage.getItem("login");
+    if (loginData !== null) {
+      this.userLoged = JSON.parse(loginData);
+    }else{
+      this.userLoged = '';
+    }
   }
+
+  closePack = () => {
+    this.shopOpening = false;
+    document.getElementsByClassName("shopOpeningBlackWindow")[0].classList.add("d-none");
+  }
+
 }
 

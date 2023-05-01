@@ -15,8 +15,15 @@ export class LoginComponent {
   nickname: string = '';
   password: string = '';
   error: string = '';
+  registered: boolean = false;
 
-  constructor(private router : Router){}
+  constructor(private router : Router){
+    if(sessionStorage.getItem("register")){
+      this.registered = true;
+    }else{
+      this.registered = false;
+    }
+  }
 
   login = () => {
     const myInit = {
@@ -27,7 +34,7 @@ export class LoginComponent {
       .then(response => response.json())
       .then(data => {
         if(data) {
-          localStorage.setItem("login",this.nickname);
+          localStorage.setItem("login",JSON.stringify(data[0]));
           this.router.navigate([this.baseUrl+'/game']);
         }else{
           this.error = 'The nickname or password is not correct.';
