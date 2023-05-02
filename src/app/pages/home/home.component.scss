@@ -252,9 +252,9 @@ input[type="text"] {
 
 .pokemonInBattle {
   width: 100%;
-  height: 92vh;
+  height: 100vh;
   position: absolute;
-  top: 8vh;
+  top: 0;
   left: 0;
   background: url("../../../assets/media/background.png");
   background-size: cover;
@@ -1259,6 +1259,40 @@ section {
   z-index: 1;
   opacity: 0.5;
 }
+
+.pokemonInBattleChangePokemonYourAnimation {
+  animation-name: changeYouPokemon;
+  animation-duration: 0.75s;
+  animation-fill-mode: forwards;
+}
+
+.pokemonInBattleChangePokemonEnemyAnimation {
+  animation-name: changeEnemyPokemon;
+  animation-duration: 0.75s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes changeYouPokemon {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-40vw);
+  }
+}
+
+@keyframes changeEnemyPokemon {
+  0% {
+    transform: translateX(40vw);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+
 
 /* CERRAR EQUIPO */
 @keyframes cerrarEquipo {

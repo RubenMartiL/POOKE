@@ -43,7 +43,7 @@ export class HomeComponent {
   listadoPokemonsUsuarios: Array<any> = [];
   equipoPokemonsUsuarios: Array<any> = [];
 
-  activeSection: string = 'home';
+  activeSection: string = 'battletest';
 
   // POKEDEX //
   pokedexInputSearch: string = '';
@@ -148,11 +148,13 @@ export class HomeComponent {
     const fetchPromises = urls.map(async (url) => {
       const response = await fetch(url, { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
       const data = await response.json();
-      const pokemonDetailsPromises = data.map(async (pokemon: any) => {
-        const pokemonDetails = this.listadoPokemonsUsuarios.push(pokemon);
-        return pokemonDetails;
-      });
-      const pokemonDetails = await Promise.all(pokemonDetailsPromises);      
+      if(data != false){
+        const pokemonDetailsPromises = data.map(async (pokemon: any) => {
+          const pokemonDetails = this.listadoPokemonsUsuarios.push(pokemon);
+          return pokemonDetails;
+        });
+        const pokemonDetails = await Promise.all(pokemonDetailsPromises);      
+      }
     });
     await Promise.all(fetchPromises);
     console.log('Cargado -> setUserPokemons');
@@ -190,15 +192,17 @@ export class HomeComponent {
     });
     await Promise.all(fetchPromises)
       .then(data => {
-        data[0].forEach(async (pokemon:any) => {
-          const response = await fetch(this.backendUrl+'getUserTeam.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
-          const data = await response.json();
-          let pokemonEsta = data.find((pokemonEncontrado:any) => pokemon.id == pokemonEncontrado.id_pokemon);
-          if(!pokemonEsta){
-            let pokemonApi = await this.getPokemonById(pokemon.id_pokemon);
-            this.pokemonBanquillo.push(this.getFusionPokemons(pokemonApi,pokemon));
-          }
-        })
+        if(data[0] != false){
+          data[0].forEach(async (pokemon:any) => {
+            const response = await fetch(this.backendUrl+'getUserTeam.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
+            const data = await response.json();
+            let pokemonEsta = data.find((pokemonEncontrado:any) => pokemon.id == pokemonEncontrado.id_pokemon);
+            if(!pokemonEsta){
+              let pokemonApi = await this.getPokemonById(pokemon.id_pokemon);
+              this.pokemonBanquillo.push(this.getFusionPokemons(pokemonApi,pokemon));
+            }
+          })
+        }
         this.pokedexCargada = true;
         console.log('Cargado -> getUserBanquillo');
       })
@@ -344,6 +348,7 @@ export class HomeComponent {
     let hits:number = 0;
     // CALCULAMOS LA PRIORIDAD DESPUES DE QUE ESCOGAN AMBOS
     this.battleCalculationPriority();
+    console.log(this.battle_priority)
     
     // APLICAMOS MOVIMIENTOS
     if(this.battle_priority == 'your'){
@@ -1141,25 +1146,32 @@ export class HomeComponent {
     if(this.shopPokemon.moves.length > 4){
       if(this.shopPokemon.moves.length > 10){
         while(arrayMoves.length < 4){
-          let random = Math.floor(Math.random() * 10);
-          !arrayMoves.includes(random) ? arrayMoves.push(random) : null;
+          let random = Math.floor(Math.random() * 10 + 1);
+          const responseMove = await fetch(this.shopPokemon.moves[random].move.url);
+          const dataMove = await responseMove.json();
+          !arrayMoves.includes(dataMove.id) ? arrayMoves.push(dataMove.id) : null;
         }
       }else{
         while(arrayMoves.length < 4){
           let random = Math.floor(Math.random() * this.shopPokemon.moves.length);
-          !arrayMoves.includes(random) ? arrayMoves.push(random) : null;
+          const responseMove = await fetch(this.shopPokemon.moves[random].move.url);
+          const dataMove = await responseMove.json();
+          !arrayMoves.includes(dataMove.id) ? arrayMoves.push(dataMove.id) : null;
         }
       }
     }else if(this.shopPokemon.moves.length == 4){
-      arrayMoves.push(0);
-      arrayMoves.push(1);
-      arrayMoves.push(2);
-      arrayMoves.push(3);
+      for(let i = 0; i < 4; i++){
+        const responseMove = await fetch(this.shopPokemon.moves[i].move.url);
+        const dataMove = await responseMove.json();
+        arrayMoves.push(dataMove.id);
+      }
     }else{
-      arrayMoves.push(0);
-      arrayMoves.push(0);
-      arrayMoves.push(0);
-      arrayMoves.push(0);
+      const responseMove = await fetch(this.shopPokemon.moves[0].move.url);
+      const dataMove = await responseMove.json();
+      arrayMoves.push(dataMove.id);
+      arrayMoves.push(dataMove.id);
+      arrayMoves.push(dataMove.id);
+      arrayMoves.push(dataMove.id);
     }
     const newPokemon = await fetch(this.backendUrl+'addPokemonToUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'pokemonId': this.shopPokemon.id, 'move1' : arrayMoves[0], 'move2' : arrayMoves[1], 'move3' : arrayMoves[2], 'move4' : arrayMoves[3]}) });
     const datanewPokemon = await newPokemon.json();
