@@ -43,7 +43,7 @@ export class HomeComponent {
   listadoPokemonsUsuarios: Array<any> = [];
   equipoPokemonsUsuarios: Array<any> = [];
 
-  activeSection: string = 'battletest';
+  activeSection: string = 'home';
 
   // POKEDEX //
   pokedexInputSearch: string = '';
@@ -348,10 +348,8 @@ export class HomeComponent {
     let hits:number = 0;
     // CALCULAMOS LA PRIORIDAD DESPUES DE QUE ESCOGAN AMBOS
     this.battleCalculationPriority();
-    console.log(this.battle_priority)
-    
     // APLICAMOS MOVIMIENTOS
-    if(this.battle_priority == 'your'){
+    //if(this.battle_priority == 'your'){
       this.battle_turn_player = 'your';
       if(this.battle_your_pokemon_movement == 'move'){
         hits = await this.battleCalculationMove(this.battle_your_pokemon,this.battle_enemy_pokemon,this.battle_your_pokemon_move); // SI USAS MOVE VS ENEMIGO
@@ -365,7 +363,7 @@ export class HomeComponent {
               this.battleNextTurn();
             },3350*hits)
           }else{
-            this.setBattleChangePokemon('your',this.battle_your_pokemon_movement); // SI CAMBIAS DE POKEMON
+            this.setBattleChangePokemon('enemy',this.battle_enemy_pokemon_move); // SI CAMBIAS DE POKEMON
             setTimeout(async() => {
               if(this.battle_priority == 'your'){ this.battle_turn_player = 'your'; this.battleCalculationAilment(this.battle_enemy_pokemon); }
               else { this.battle_turn_player = 'enemy'; this.battleCalculationAilment(this.battle_your_pokemon); }
@@ -374,7 +372,7 @@ export class HomeComponent {
           }
         }, 3350 * hits)
       }else{
-        this.setBattleChangePokemon('your',this.battle_your_pokemon_movement); // SI CAMBIAS DE POKEMON
+        this.setBattleChangePokemon('your',this.battle_your_pokemon_move); // SI CAMBIAS DE POKEMON
         setTimeout(async () => {
           this.battle_turn_player = 'enemy';
           if(this.battle_enemy_pokemon_movement == 'move'){
@@ -385,7 +383,7 @@ export class HomeComponent {
               this.battleNextTurn();
             },3350*hits)
           }else{
-            this.setBattleChangePokemon('your',this.battle_your_pokemon_movement); // SI CAMBIAS DE POKEMON
+            this.setBattleChangePokemon('enemy',this.battle_enemy_pokemon_move); // SI CAMBIAS DE POKEMON
             setTimeout(async() => {
               if(this.battle_priority == 'your'){ this.battle_turn_player = 'your'; this.battleCalculationAilment(this.battle_enemy_pokemon); }
               else { this.battle_turn_player = 'enemy'; this.battleCalculationAilment(this.battle_your_pokemon); }
@@ -395,9 +393,9 @@ export class HomeComponent {
         }, 3350 * 1)
       }
       
-    }else{
+    //}else{
       // LO DE ARRIBA AL REVES
-    }
+    //}
   }
 
   setBattleMenu = (section: string) => {
@@ -687,17 +685,41 @@ export class HomeComponent {
 
   setBattleChangePokemon = (pokemonTrainer:any, pokemonPosition:number) => {
     let pokemonBackup;
-    if(pokemonTrainer == 'your'){ 
-      pokemonBackup = this.battle_yourTeam[0]; 
-      this.battle_your_pokemon = this.battle_yourTeam[pokemonPosition];
-      this.battle_yourTeam[0] = this.battle_yourTeam[pokemonPosition];
-      this.battle_yourTeam[pokemonPosition] = pokemonBackup;
+    this.battle_your_pokemon_animation = 'wait';
+    this.battle_enemy_pokemon_animation = 'wait';
+
+    if(pokemonTrainer == 'your'){
+      this.battleMessagesLetterByLetter(`¡Sale ${this.formatNamePokemonPokedex(this.battle_your_pokemon.name)}! ¡Entra ${this.formatNamePokemonPokedex(this.battle_yourTeam[pokemonPosition].name)}!`)
+      this.battle_your_pokemon_animation = 'changePokemon1';
+      this.battle_menu = 'principal';
+      setTimeout(async()=>{
+        pokemonBackup = this.battle_yourTeam[0]; 
+        this.battle_your_pokemon = this.battle_yourTeam[pokemonPosition];
+        this.battle_yourTeam[0] = this.battle_yourTeam[pokemonPosition];
+        this.battle_yourTeam[pokemonPosition] = pokemonBackup;
+        this.battle_your_pokemon_animation = 'changePokemon2';
+        this.battle_your_pokemon_moves = [];
+        this.battle_your_pokemon_moves.push(await this.getMoves(this.battle_your_pokemon.unique.move_one));
+        this.battle_your_pokemon_moves.push(await this.getMoves(this.battle_your_pokemon.unique.move_two));
+        this.battle_your_pokemon_moves.push(await this.getMoves(this.battle_your_pokemon.unique.move_three));
+        this.battle_your_pokemon_moves.push(await this.getMoves(this.battle_your_pokemon.unique.move_four));
+        
+        this.battle_your_pokemon_moves[0].descripcionSpanish = this.getDescriptionInSpanishMove(this.battle_your_pokemon_moves[0])
+        this.battle_your_pokemon_moves[1].descripcionSpanish = this.getDescriptionInSpanishMove(this.battle_your_pokemon_moves[1])
+        this.battle_your_pokemon_moves[2].descripcionSpanish = this.getDescriptionInSpanishMove(this.battle_your_pokemon_moves[2])
+        this.battle_your_pokemon_moves[3].descripcionSpanish = this.getDescriptionInSpanishMove(this.battle_your_pokemon_moves[3])
+      },750)
     }
     else{ 
-      pokemonBackup = this.battle_enemyTeam[0]; 
-      this.battle_enemy_pokemon = this.battle_enemyTeam[pokemonPosition];
-      this.battle_enemyTeam[0] = this.battle_enemyTeam[pokemonPosition];
-      this.battle_enemyTeam[pokemonPosition] = pokemonBackup;
+      this.battleMessagesLetterByLetter(`'El ${this.formatNamePokemonPokedex(this.battle_enemy_pokemon.name)} enemigo sale! ¡Entra ${this.formatNamePokemonPokedex(this.battle_enemyTeam[pokemonPosition].name)}!`)
+      this.battle_enemy_pokemon_animation = 'changePokemon1';
+      setTimeout(()=>{
+        pokemonBackup = this.battle_enemyTeam[0]; 
+        this.battle_enemy_pokemon = this.battle_enemyTeam[pokemonPosition];
+        this.battle_enemyTeam[0] = this.battle_enemyTeam[pokemonPosition];
+        this.battle_enemyTeam[pokemonPosition] = pokemonBackup;
+        this.battle_enemy_pokemon_animation = 'changePokemon2';
+      },750)
     }
   }
 
@@ -982,10 +1004,13 @@ export class HomeComponent {
 
     // Apply everything
       if(battle_movement_accuracy && !battle_movement_paralisis && !battle_movement_freeze){
-
+        if(this.battle_turn_player == 'your'){
+          this.battleMessagesLetterByLetter(`¡Tu ${this.formatNamePokemonPokedex(pokemonAtaca.name)} ha usado ${movementRealizado.names[5].name}!`)
+        }else{
+          this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha usado ${movementRealizado.names[5].name}!`)
+        }
         // APLICAMOS ESTADO
         if(battle_movement_ailment_chance){ 
-          console.log("QUEMAO")
           pokemonRecibe.battleStats.states.push(battle_movement_ailment);
           if(battle_movement_ailment.name == 'sleep'){
             pokemonRecibe.battleStats.sleepturns = Math.floor(Math.random() * 7) + 1;
@@ -998,7 +1023,7 @@ export class HomeComponent {
         if(pokemonAtaca.battleStats.actual.ps + battle_movement_healing < pokemonAtaca.battleStats.ps){
           pokemonAtaca.battleStats.actual.ps += battle_movement_healing;
         }else{
-          pokemonAtaca.battleStats.actual.ps = this.battle_your_pokemon.battleStats.ps;
+          pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps;
         }
 
         // APLICAMOS FLINCH
@@ -1065,7 +1090,20 @@ export class HomeComponent {
         }
 
       }else{
-        // MENSAJITO DE FALLO ESTARIA BIEN
+        if(!battle_movement_accuracy){
+          if(this.battle_turn_player == 'your'){
+            this.battle_your_pokemon_animation = 'attack';
+            this.battle_enemy_pokemon_animation = 'esquiveAttack';
+          }else{
+            this.battle_your_pokemon_animation = 'esquiveAttack';
+            this.battle_enemy_pokemon_animation = 'attack';
+          }
+        }
+        if(this.battle_turn_player == 'your'){
+          this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha fallado!`)
+        }else{
+          this.battleMessagesLetterByLetter(`¡Tu ${this.formatNamePokemonPokedex(pokemonAtaca.name)} ha fallado!`)
+        }
       }
 
       // CONSOLES
@@ -1190,6 +1228,15 @@ export class HomeComponent {
   closePack = () => {
     this.shopOpening = false;
     document.getElementsByClassName("shopOpeningBlackWindow")[0].classList.add("d-none");
+  }
+
+  getState = (pokemon:any, state:string) => {
+    if(pokemon.battleStats.states){
+      console.log(pokemon)
+      console.log(pokemon.battleStats.states.filter((state:any) => { state.name == 'burn' }).length > 0 ? true : false)
+      return pokemon.battleStats.states.filter((state:any) => { state.name == 'burn' }).length > 0 ? true : false;
+    }
+    return false;
   }
 
 }

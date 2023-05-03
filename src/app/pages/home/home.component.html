@@ -165,7 +165,10 @@
                     <div id="hudPokemonPlayer" class="pokemonInBattlePokemonHud" [ngClass]="{
                         'pokemonInBattleIdleAnimation':battle_your_pokemon_animation == 'wait',
                         'pokemonInBattleAttackYouAnimation':battle_your_pokemon_animation == 'attack',
-                        'pokemonInBattleReceiveAttackYouAnimation':battle_your_pokemon_animation == 'receiveAttack'
+                        'pokemonInBattleReceiveAttackYouAnimation':battle_your_pokemon_animation == 'receiveAttack',
+                        'pokemonInBattleReceiveAttackEsquiveYouAnimation':battle_your_pokemon_animation == 'esquiveAttack',
+                        'pokemonInBattleChangePokemonYourAnimation':battle_your_pokemon_animation == 'changePokemon1',
+                        'pokemonInBattleChangePokemonEnemyAnimation':battle_your_pokemon_animation == 'changePokemon2'
                     }">
                         <div class="d-flex align-items-end w-100">
                             <div class="pokemonInBattlePokemonPSBox">
@@ -175,13 +178,19 @@
                             <div class="pokemonInBattlePokemonLifeBarBox">
                                 <div class="pokemonInBattlePokemonLifeBarBoxText">
                                     <span *ngIf="battle_your_pokemon.unique">
-                                        <p *ngIf="battle_your_pokemon.unique.name != null">
-                                            {{formatNamePokemonPokedex(battle_your_pokemon.unique.name)}}</p>
-                                        <p *ngIf="battle_your_pokemon.unique.name == null">
-                                            {{formatNamePokemonPokedex(battle_your_pokemon.name)}}</p>
+                                        <p *ngIf="battle_your_pokemon.unique.name != null" class="d-flex align-items-center">
+                                            {{formatNamePokemonPokedex(battle_your_pokemon.unique.name)}}
+                                            <img *ngIf="getState(battle_your_pokemon,'burn')" src="{{baseUrl}}assets/media/battle_state_fire.png"/>
+                                        </p>
+                                        <p *ngIf="battle_your_pokemon.unique.name == null" class="d-flex align-items-center">
+                                            {{formatNamePokemonPokedex(battle_your_pokemon.name)}}
+                                            <img *ngIf="getState(battle_your_pokemon,'burn')" src="{{baseUrl}}assets/media/battle_state_fire.png"/>
+                                        </p>
                                     </span>
-                                    <p *ngIf="!battle_your_pokemon.unique">
-                                        {{formatNamePokemonPokedex(battle_your_pokemon.unique.name)}}</p>
+                                    <p *ngIf="!battle_your_pokemon.unique" class="d-flex align-items-center">
+                                        {{formatNamePokemonPokedex(battle_your_pokemon.unique.name)}}
+                                        <img *ngIf="getState(battle_your_pokemon,'burn')" src="{{baseUrl}}assets/media/battle_state_fire.png"/>
+                                    </p>
                                     <p><span>LVL</span>&nbsp;{{battle_your_pokemon.unique.lvl}}</p>
                                 </div>
                                 <div class="pokemonInBattlePokemonHudPSBackground">
@@ -207,7 +216,10 @@
                     <div class="pokemonInBattlePokemonHud" [ngClass]="{
                             'pokemonInBattleIdleAnimation':battle_enemy_pokemon_animation == 'wait',
                             'pokemonInBattleAttackEnemyAnimation':battle_enemy_pokemon_animation == 'attack',
-                            'pokemonInBattleReceiveAttackEnemyAnimation':battle_enemy_pokemon_animation == 'receiveAttack'
+                            'pokemonInBattleReceiveAttackEnemyAnimation':battle_enemy_pokemon_animation == 'receiveAttack',
+                            'pokemonInBattleReceiveAttackEsquiveEnemyAnimation':battle_enemy_pokemon_animation == 'esquiveAttack',
+                            'pokemonInBattleChangePokemonEnemyAnimation':battle_enemy_pokemon_animation == 'changePokemon1',
+                            'pokemonInBattleChangePokemonYourAnimation':battle_enemy_pokemon_animation == 'changePokemon2'
                         }">
                         <div class="d-flex align-items-end w-100">
                             <div class="pokemonInBattlePokemonPSBox">
