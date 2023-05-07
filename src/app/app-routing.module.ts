@@ -5,6 +5,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { environment } from 'src/environments/environment';
 import { environment as environmentProd } from 'src/environments/environment.prod';
+import { LoginNeedGuard } from './login-need.guard';
 
 const routes: Routes = [
   { path: environment.baseUrl+'', component: LoginComponent },

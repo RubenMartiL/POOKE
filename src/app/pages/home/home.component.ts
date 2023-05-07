@@ -1,5 +1,6 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, ElementRef, QueryList, ViewChildren, Renderer2 } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, Renderer2, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
 import Chart from 'chart.js/auto';
 import { environment } from 'src/environments/environment';
 import { environment as environmentProd } from 'src/environments/environment.prod';
@@ -45,6 +46,9 @@ export class HomeComponent {
 
   activeSection: string = 'home';
 
+  // OAK //
+  homeMessageNoTeam:boolean = false;
+
   // POKEDEX //
   pokedexInputSearch: string = '';
   pokedexList: Array<any> = [];
@@ -60,6 +64,7 @@ export class HomeComponent {
   pokemonDatosStatsChart: any;
   pokemonDatosStatsChartGenerated: boolean = false;
   pokemonDatosMoves: Array<any> = [];
+  pokemonDatosLastSection:string = '';
 
   // TEAM
   pokemonTeam: any = '';
@@ -100,13 +105,22 @@ export class HomeComponent {
   battle_damage: Array<number> = [];
   battle_damage_width: number = 0;
   battle_health_width: number = 0;
+  battle_damageDrain_width: number = 0;
   battle_lastMovement: any = '';
   battle_messages: string = '';
   battle_priority: string = '';
   battleEndTurn: boolean = false;
+  battleResult:string = '';
+  battle_enemyTeamPrincipio:number = 0;
+  battle_movement_healing = 0
+  battle_movement_drain: Array<number> = [];
+  backgroundStyle:any;
   @ViewChildren('combatTooltips') combatTooltips: ElementRef[] = [];;
 
-  constructor(private chatgpt: ChatGptApiService, private elementRef: ElementRef, private renderer: Renderer2) {
+  constructor(private chatgpt: ChatGptApiService, private elementRef: ElementRef, private renderer: Renderer2, private router : Router) {
+    if(!localStorage.getItem("login")){ 
+      this.router.navigate([this.baseUrl+'']);
+    }
     const loginData = localStorage.getItem('login');
     if (loginData !== null) {
       this.userLoged = JSON.parse(loginData);
@@ -127,7 +141,7 @@ export class HomeComponent {
   setAllPokemons = async () => {
     this.pokedexCargada = false;
     const pokemonList: Array<any> = [];
-    const urls = ['https://pokeapi.co/api/v2/pokemon?limit=150&offset=0'];
+    const urls = ['https://pokeapi.co/api/v2/pokemon?limit=151&offset=0'];
     const fetchPromises = urls.map(async (url) => {
       const response = await fetch(url);
       const data = await response.json();
@@ -228,9 +242,27 @@ export class HomeComponent {
     return data;
   }
 
+  closeOakHome = (oak:number) => {
+    document.getElementsByClassName('oak_image')[oak].classList.add("oakOut");
+    document.getElementsByClassName('oak_background')[oak].classList.add("oakOut");
+    setTimeout(() => {
+      this.homeMessageNoTeam = false;
+    }, 1000);
+  }
+
   setSection = async (seccion: string) => {
-    this.activeSection = seccion;
-    if (seccion == 'team') {
+    if(this.equipoPokemonsUsuarios.length > 0 && seccion == 'battle'){
+      this.activeSection = seccion;
+      this.battle();
+    }else{
+      if(this.equipoPokemonsUsuarios.length <= 0 && seccion == 'battle'){
+        this.homeMessageNoTeam = true;
+      }else{
+        this.activeSection = seccion;
+      }
+    }
+
+    if (seccion == 'equipo') {
       this.listadoPokemonsUsuarios = [];
       this.equipoPokemonsUsuarios = [];
       this.pokemonBanquillo = [];
@@ -241,7 +273,16 @@ export class HomeComponent {
     }
 
     if (seccion == 'home') {
-      this.teamPestanya = 'cerrada'
+      this.teamPestanya = 'abierta'
+      let minBackground = 1;
+      let maxBackground = 10;
+      let randomBackground = Math.floor(Math.random() * (maxBackground - minBackground + 1)) + minBackground;
+      this.backgroundStyle = `url('${this.baseUrl}/pokemon/assets/media/battleBackgrounds/${randomBackground}.png')`;
+    }
+
+    if (seccion = 'pokedex'){
+      this.listadoPokemonsUsuarios = [];
+      await this.setUserPokemons();
     }
   }
 
@@ -276,6 +317,7 @@ export class HomeComponent {
     this.pokedexList = this.pokemonList;
     let mostrarTipo = false;
     let mostrarNombre = false;
+    let mostrarCaptured = false;
     let newPokedexList: Array<any> = [];
     if (tipo != null && this.pokedexTiposSelected.indexOf(tipo) != -1) {
       this.pokedexTiposSelected.splice(this.pokedexTiposSelected.indexOf(tipo), 1);
@@ -287,16 +329,39 @@ export class HomeComponent {
         if (this.pokedexTiposSelected.includes(tipoPokemon.type.name)) { mostrarTipo = true; }
       })
       if (pokemon.name.includes(this.pokedexInputSearch.toLowerCase())) { mostrarNombre = true; }
+      if (this.comprobarPokemonCaptured(pokemon.id)){ mostrarCaptured = true; }
       if (this.pokedexTiposSelected.length <= 0) { mostrarTipo = true }
       if (mostrarNombre && mostrarTipo) { newPokedexList.push(pokemon); }
       mostrarTipo = false;
       mostrarNombre = false;
+      mostrarCaptured = false;
     })
     this.pokedexList = newPokedexList;
   }
 
+  getBackground = () => {
+    return this.backgroundStyle;
+  }
+
   battle = async () => {
+    this.inBattle = false;
+    this.battle_menu_show = false;
     this.pokedexCargada = false;
+    this.battle_enemyTeam = [];
+    this.battle_yourTeam = [];
+    this.battle_your_pokemon = '';
+    this.battle_enemy_pokemon = '';
+    this.battle_your_pokemon_moves = [];
+    this.battle_enemy_pokemon_moves = [];
+    this.battle_your_pokemon_animation = 'idle';
+    this.battle_enemy_pokemon_animation = 'idle';
+    this.battle_your_pokemon_movement = '';
+    this.battle_your_pokemon_move = '';
+    this.battle_enemy_pokemon_movement = '';
+    this.battle_enemy_pokemon_move = '';
+    this.battle_menu = 'principal';
+    this.battle_enemyTeamPrincipio = 0;
+
     this.equipoPokemonsUsuarios.forEach(pokemon => {
       this.battle_yourTeam.push(this.getInBattlePokemon(pokemon));
     })
@@ -309,7 +374,10 @@ export class HomeComponent {
 
     let min = this.equipoPokemonsUsuarios.length - 1;
     let max = this.equipoPokemonsUsuarios.length + 1;
-    const randomIntegrantes = Math.floor(Math.random() * (max - min + 1)) + min;
+    let randomIntegrantes = Math.floor(Math.random() * (max - min + 1)) + min;
+    if(randomIntegrantes <= 0){ randomIntegrantes = 1; }
+    if(randomIntegrantes >= 7){ randomIntegrantes = 6; }
+    this.battle_enemyTeamPrincipio = randomIntegrantes;
     min = nivelMedio - 2;
     if (min <= 0) { min = 1; }
     max = nivelMedio + 2;
@@ -371,7 +439,6 @@ export class HomeComponent {
     this.battle_your_pokemon = this.battle_yourTeam[0];
     this.battle_enemy_pokemon = this.battle_enemyTeam[0];
 
-    console.log(this.battle_enemyTeam)
     // Para dibujar los movimientos del Pokemon en el menu
     this.battle_your_pokemon_moves.push(await this.getMoves(this.battle_your_pokemon.unique.move_one));
     this.battle_your_pokemon_moves.push(await this.getMoves(this.battle_your_pokemon.unique.move_two));
@@ -407,12 +474,16 @@ export class HomeComponent {
     // TURNO ENEMIGO CAMBIAR LUEGO
     this.setBattleMovement('move',this.battle_enemy_pokemon_moves[accionEncontrada],'enemy');
     */
-    this.setBattleMovement('move', this.battle_enemy_pokemon_moves[0], 'enemy');
 
     this.battleMessagesLetterByLetter(`¿Que deberia hacer ${this.formatNamePokemonPokedex(this.battle_your_pokemon.name)}?`)
   }
 
   battleTurn = async () => {
+    let min = 0;
+    let max = 3;
+    let randomMove = Math.floor(Math.random() * (max - min + 1)) + min;
+    this.setBattleMovement('move', this.battle_enemy_pokemon_moves[randomMove], 'enemy');
+
     this.battleEndTurn = false;
     // VARIABLE NECESARIA PARA ESPERAR LOS MOVES
     let hits: number = -1;
@@ -557,6 +628,10 @@ export class HomeComponent {
     }
   }
 
+  getWidthLvl = (pokemon:any) => {
+    return pokemon.unique.lvl_progress + "%";
+  }
+
   getPokemonsDatosRepeats = () => {
 
     let arrayPokemonsIgualAlViendo: Array<any> = [];
@@ -574,32 +649,53 @@ export class HomeComponent {
     return arrayPokemonsIgualAlViendo;
   }
 
-  goToPokemonDatos = async (pokemon: any, selected: number) => {
+  goToPokemonDatos = async (pokemon: any, selected: number, lastSection = 'recharge') => {
+    this.pokedexCargada = false;
+
+    if(lastSection !== 'recharge'){
+      this.pokemonDatosLastSection = lastSection
+    }
     this.deleteStatsChart();
     if (this.activeSection != 'perfil') { this.pokemonDatosBase = { ...pokemon }; }
     this.activeSection = 'perfil';
+    this.pokemonDatos = '';
     this.pokemonDatos = { ...pokemon };
     this.pokemonListadoPokemonsRepetidos = this.getPokemonsDatosRepeats();
     this.pokemonDatosSelected = selected;
-
     this.pokemonDatosMoves = [];
-    this.pokemonDatos.moves.forEach(async (move: any) => {
-      this.pokemonDatosMoves.push(await this.getMovesByUrl(move.move.url));
-    })
-
-    if (pokemon.unique != undefined) {
-      let pokemonApi = await this.getPokemonById(pokemon.id);
-      let pokemonBBDD = await this.getUserPokemonById(pokemon.unique.id);
-      let pokemonFusion = await this.getFusionPokemons(pokemonApi, pokemonBBDD[0]);
-      this.pokemonDatos = await this.getInBattlePokemon(pokemonFusion);
-      this.deleteStatsChart();
-      this.getStatsChart();
+    if(this.pokemonDatosSelected != -1){
+      let pokemonUser = await this.getUserPokemonById(this.pokemonDatos.unique.id);
+      this.pokemonDatosMoves.push(await this.getMoves(pokemonUser[0].move_one));
+      this.pokemonDatosMoves.push(await this.getMoves(pokemonUser[0].move_two));
+      this.pokemonDatosMoves.push(await this.getMoves(pokemonUser[0].move_three));
+      this.pokemonDatosMoves.push(await this.getMoves(pokemonUser[0].move_four));
+    }else{
+      for(let i = 0; i < 4; i++){
+        if(this.pokemonDatos.moves[i] != undefined){
+          this.pokemonDatosMoves.push(await this.getMovesByUrl(this.pokemonDatos.moves[i].move.url));
+        }else{
+          this.pokemonDatosMoves.push(await this.getMovesByUrl(this.pokemonDatos.moves[0].move.url));
+        }
+      }
     }
+    
+    if(pokemon.unique != undefined){
+      if (pokemon.unique.id != undefined) {
+        let pokemonApi = await this.getPokemonById(pokemon.id);
+        let pokemonBBDD = await this.getUserPokemonById(pokemon.unique.id);
+        let pokemonFusion = await this.getFusionPokemons(pokemonApi, pokemonBBDD[0]);
+        this.pokemonDatos = await this.getInBattlePokemon(pokemonFusion);
+        this.deleteStatsChart();
+        this.getStatsChart();
+      }
+    }
+    
+    this.pokedexCargada = true;
   }
 
   goToSection = (section: string) => {
     this.activeSection = section;
-    if (section == 'team') {
+    if (section == 'equipo') {
       this.getUserBanquillo();
     }
   }
@@ -643,6 +739,7 @@ export class HomeComponent {
     newPokemon.unique.id_pokemon = pokemonBBDD.id;
     newPokemon.unique.name = pokemonBBDD.name_pokemon;
     newPokemon.unique.lvl = pokemonBBDD.lvl_pokemon;
+    newPokemon.unique.lvl_progress = pokemonBBDD.lvl_progress;
     newPokemon.unique.naturaleza = pokemonBBDD.naturaleza;
     newPokemon.unique.move_one = pokemonBBDD.move_one;
     newPokemon.unique.move_two = pokemonBBDD.move_two;
@@ -773,10 +870,13 @@ export class HomeComponent {
   }
 
   getPokemonPSInBattleStatHealth = (pokemon: any, health: number) => {
-    if (health >= pokemon.battleStats.actual.ps) { return (pokemon.battleStats.actual.ps * 100) / pokemon.battleStats.ps; }
-    if (health != 0) {
-      return (health * 100) / pokemon.battleStats.ps;
+    if(health > 0){
+      if (health >= pokemon.battleStats.actual.ps) { return (pokemon.battleStats.actual.ps * 100) / pokemon.battleStats.ps; }
+      if (health != 0) {
+        return (health * 100) / pokemon.battleStats.ps;
+      }
     }
+    
     return 0;
   }
 
@@ -853,7 +953,7 @@ export class HomeComponent {
   }
 
   generadorDePokemonsAleatorios = async () => {
-    let generatedPokemon = await this.getPokemonById(Math.floor(Math.random() * 150) + 1);
+    let generatedPokemon = await this.getPokemonById(Math.floor(Math.random() * 151) + 1);
     return generatedPokemon;
   }
 
@@ -1025,9 +1125,11 @@ export class HomeComponent {
     // RESET DE FINAL DE TURNO
     this.battle_your_pokemon_animation = 'wait';
     this.battle_enemy_pokemon_animation = 'wait';
-
-    // check accuracy
-    let battle_movement_accuracy = Math.random() * 100 < movementRealizado.accuracy;
+    this.battle_movement_healing = 0
+    this.battle_movement_drain = [];
+    this.battle_damageDrain_width = 0;
+    this.battle_damage_width = 0;
+    this.battle_health_width = 0;
 
     // check repeticiones
     let battle_movement_hits = 1;
@@ -1036,8 +1138,8 @@ export class HomeComponent {
     }
 
     // check meta > ailment chance
-    //let battle_movement_ailment_chance = Math.random() * 100 < movementRealizado.meta.ailment_chance;
-    let battle_movement_ailment_chance = true;
+    let battle_movement_ailment_chance = Math.random() * 100 < movementRealizado.meta.ailment_chance;
+    //let battle_movement_ailment_chance = true;
 
     // check meta > ailment
     let battle_movement_ailment = movementRealizado.meta.ailment;
@@ -1064,17 +1166,17 @@ export class HomeComponent {
     }
 
     // check healing 0=no cura, 1=cura toda la vida, intermedios cura porcentajes (RESPECTO VIDA TOTAL DEL QUE LO USA)
-    let battle_movement_healing = 0;
     if (movementRealizado.meta.healing != 0) {
-      battle_movement_healing = movementRealizado.meta.healing;
+      this.battle_movement_healing = (movementRealizado.meta.healing * pokemonAtaca.battleStats.ps) / 100;
     }
+
     // check drain, igual que arriba (RESPECTO DAÑO INFLINGIDO, ESTO INFLINGUE DAÑO Y CURA)
-    let battle_movement_drain: Array<number> = [];
     if (movementRealizado.meta.drain != 0) {
       for (let i = 0; i < battle_movement_hits; i++) {
-        let drain = this.battle_damage[i] * movementRealizado.meta.drain / 100;
-        if (drain < 1) { drain = 1; }
-        battle_movement_drain.push(drain);
+        let drain = Math.floor(this.battle_damage[i] * movementRealizado.meta.drain / 100);
+        if (drain < 1 && drain > 0) { drain = 1; }
+        if (drain > -1 && drain < 0) { drain = -1; }
+        this.battle_movement_drain.push(drain);
       }
     }
     // check flinch, 0=nunca, 1 siempre, entre medios porcentaje (hace que si sale true el enemigo pierda el turno)
@@ -1105,107 +1207,118 @@ export class HomeComponent {
     //} 
 
     // Apply everything
-    if (battle_movement_accuracy && !battle_movement_paralisis && !battle_movement_freeze) {
-      if (this.battle_turn_player == 'your') {
-        this.battleMessagesLetterByLetter(`¡Tu ${this.formatNamePokemonPokedex(pokemonAtaca.name)} ha usado ${movementRealizado.names[5].name}!`)
-      } else {
-        this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha usado ${movementRealizado.names[5].name}!`)
-      }
-      // APLICAMOS ESTADO
-      if (battle_movement_ailment_chance) {
-        pokemonRecibe.battleStats.states.push(battle_movement_ailment);
-        if (battle_movement_ailment.name == 'sleep') {
-          pokemonRecibe.battleStats.sleepturns = Math.floor(Math.random() * 7) + 1;
-        }
-      }
-
-      // APLICAMOS ESTADOS RAROS
-      if (battle_movement_ailment == 'leech-seed') { pokemonRecibe.battleStats.states.push(battle_movement_ailment); }
-      // APLICAMOS CURACION HEALTH
-      if (pokemonAtaca.battleStats.actual.ps + battle_movement_healing < pokemonAtaca.battleStats.ps) {
-        pokemonAtaca.battleStats.actual.ps += battle_movement_healing;
-      } else {
-        pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps;
-      }
-
-      // APLICAMOS FLINCH
-      if (battle_movement_flinch) { pokemonRecibe.battleStats.flinch = true; }
-
-      if (battle_movement_stat_name.length > 0) {
-        battle_movement_stat_name.forEach((name, index) => {
-          switch (name) {
-            case 'hp': pokemonRecibe.battleStats.actual.ps += battle_movement_stat_change[index] * 10; break;
-            case 'attack': pokemonRecibe.battleStats.actual.atk += battle_movement_stat_change[index] * 1000; break;
-            case 'defense': pokemonRecibe.battleStats.actual.def += battle_movement_stat_change[index] * 10; break;
-            case 'special-attack': pokemonRecibe.battleStats.actual.spa += battle_movement_stat_change[index] * 10; break;
-            case 'special-defense': pokemonRecibe.battleStats.actual.spd += battle_movement_stat_change[index] * 10; break;
-            case 'speed': pokemonRecibe.battleStats.actual.spe += battle_movement_stat_change[index] * 10; break;
-          }
-        })
-      }
-
-      /* ANIMACIONES, BARRAS DE VIDA */
-      if (this.battle_turn_player == 'your') {
-        this.battle_your_pokemon_animation = 'attack';
-        this.battle_enemy_pokemon_animation = 'receiveAttack';
-      } else {
-        this.battle_your_pokemon_animation = 'receiveAttack';
-        this.battle_enemy_pokemon_animation = 'attack';
-      }
-
-      for (let i = 0; i < battle_movement_hits; i++) {
-        setTimeout(() => {
-          this.battle_your_pokemon_animation = 'wait';
-          this.battle_enemy_pokemon_animation = 'wait';
-        }, 3000 * i)
-
-        setTimeout(async () => {
-          if (this.battle_turn_player == 'your') {
-            this.battle_your_pokemon_animation = 'attack';
-            this.battle_enemy_pokemon_animation = 'receiveAttack';
-          } else {
-            this.battle_your_pokemon_animation = 'receiveAttack';
-            this.battle_enemy_pokemon_animation = 'attack';
-          }
-          // METEMOS DAÑO AL ENEMIGO
-          this.battle_damage_width = await this.getPokemonPSInBattleStatDamage(pokemonRecibe, this.battle_damage[i]);
-          if (this.battle_damage[i] >= pokemonRecibe.battleStats.actual.ps) { pokemonRecibe.battleStats.actual.ps = 0; }
-          else { pokemonRecibe.battleStats.actual.ps -= this.battle_damage[i]; }
-
-          // METEMOS DRAIN EN CASO QUE HAYA
-          if (battle_movement_drain[i]) {
-            if (pokemonAtaca.battleStats.actual.ps + battle_movement_drain[i] < pokemonAtaca.battleStats.ps) {
-              pokemonAtaca.battleStats.actual.ps += battle_movement_drain[i];
-            } else {
-              pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps;
-            }
-            this.battle_health_width = await this.getPokemonPSInBattleStatHealth(pokemonRecibe, battle_movement_drain[i]);
-          }
-
-          // METEMOS HEALTH EN CASO QUE HAYA
-          if (battle_movement_healing > 0) {
-            if (pokemonAtaca.battleStats.actual.ps + battle_movement_healing < pokemonAtaca.battleStats.ps) { pokemonAtaca.battleStats.actual.ps += battle_movement_healing }
-            else { pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps; }
-            this.battle_health_width = await this.getPokemonPSInBattleStatHealth(pokemonRecibe, battle_movement_healing);
-          }
-        }, 3100 * i)
-      }
-
+    if (this.battle_turn_player == 'your') {
+      this.battleMessagesLetterByLetter(`¡Tu ${this.formatNamePokemonPokedex(pokemonAtaca.name)} ha usado ${movementRealizado.names[5].name}!`)
     } else {
-      if (!battle_movement_accuracy) {
+      this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha usado ${movementRealizado.names[5].name}!`)
+    }
+
+    if(battle_movement_hits == null){ battle_movement_hits = 1; }
+    for (let i = 0; i < battle_movement_hits; i++) {
+      // check accuracy
+      let battle_movement_accuracy = Math.random() * 100 < movementRealizado.accuracy;
+      if(movementRealizado.accuracy == null){ battle_movement_accuracy = true }
+
+      if (battle_movement_accuracy && !battle_movement_paralisis && !battle_movement_freeze) {
+
+        // APLICAMOS ESTADO
+        if (battle_movement_ailment_chance) {
+          pokemonRecibe.battleStats.states.push(battle_movement_ailment);
+          if (battle_movement_ailment.name == 'sleep') {
+            pokemonRecibe.battleStats.sleepturns = Math.floor(Math.random() * 7) + 1;
+          }
+        }
+
+        // APLICAMOS ESTADOS RAROS
+        if (battle_movement_ailment == 'leech-seed') { pokemonRecibe.battleStats.states.push(battle_movement_ailment); }
+
+        // APLICAMOS FLINCH
+        if (battle_movement_flinch) { pokemonRecibe.battleStats.flinch = true; }
+
+        if (battle_movement_stat_name.length > 0) {
+          battle_movement_stat_name.forEach((name, index) => {
+            switch (name) {
+              case 'hp': pokemonRecibe.battleStats.actual.ps += battle_movement_stat_change[index] * 10; break;
+              case 'attack': pokemonRecibe.battleStats.actual.atk += battle_movement_stat_change[index] * 1000; break;
+              case 'defense': pokemonRecibe.battleStats.actual.def += battle_movement_stat_change[index] * 10; break;
+              case 'special-attack': pokemonRecibe.battleStats.actual.spa += battle_movement_stat_change[index] * 10; break;
+              case 'special-defense': pokemonRecibe.battleStats.actual.spd += battle_movement_stat_change[index] * 10; break;
+              case 'speed': pokemonRecibe.battleStats.actual.spe += battle_movement_stat_change[index] * 10; break;
+            }
+          })
+        }
+
+        /* ANIMACIONES, BARRAS DE VIDA */
         if (this.battle_turn_player == 'your') {
           this.battle_your_pokemon_animation = 'attack';
-          this.battle_enemy_pokemon_animation = 'esquiveAttack';
+          this.battle_enemy_pokemon_animation = 'receiveAttack';
         } else {
-          this.battle_your_pokemon_animation = 'esquiveAttack';
+          this.battle_your_pokemon_animation = 'receiveAttack';
           this.battle_enemy_pokemon_animation = 'attack';
         }
-      }
-      if (this.battle_turn_player == 'your') {
-        this.battleMessagesLetterByLetter(`¡Tu ${this.formatNamePokemonPokedex(pokemonAtaca.name)} ha fallado!`)
-      } else {
-        this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha fallado!`)
-      }
+
+          setTimeout(() => {
+            this.battle_your_pokemon_animation = 'wait';
+            this.battle_enemy_pokemon_animation = 'wait';
+          }, 3000 * i)
+
+          setTimeout(async () => {
+            if (this.battle_turn_player == 'your') {
+              this.battle_your_pokemon_animation = 'attack';
+              this.battle_enemy_pokemon_animation = 'receiveAttack';
+            } else {
+              this.battle_your_pokemon_animation = 'receiveAttack';
+              this.battle_enemy_pokemon_animation = 'attack';
+            }
+            // METEMOS DAÑO AL ENEMIGO
+            this.battle_damage_width = await this.getPokemonPSInBattleStatDamage(pokemonRecibe, this.battle_damage[i]);
+            if (this.battle_damage[i] >= pokemonRecibe.battleStats.actual.ps) { pokemonRecibe.battleStats.actual.ps = 0; }
+            else { pokemonRecibe.battleStats.actual.ps -= this.battle_damage[i]; }
+
+            // METEMOS DRAIN EN CASO QUE HAYA
+            if (this.battle_movement_drain[i]) {
+              if (pokemonAtaca.battleStats.actual.ps + this.battle_movement_drain[i] < pokemonAtaca.battleStats.ps) {
+                pokemonAtaca.battleStats.actual.ps += this.battle_movement_drain[i];
+              } else {
+                pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps;
+              }
+              if(this.battle_movement_drain[i] > 0) {
+                this.battle_damageDrain_width = 0;
+                this.battle_health_width = await this.getPokemonPSInBattleStatHealth(pokemonRecibe, this.battle_movement_drain[i]);
+              }else if(this.battle_movement_drain[i] < 0){
+                this.battle_damageDrain_width = await this.getPokemonPSInBattleStatDamage(pokemonRecibe, -(this.battle_movement_drain[i]));
+              }
+            }
+
+            // METEMOS HEALTH EN CASO QUE HAYA
+            if (this.battle_movement_healing > 0) {
+              if(pokemonAtaca.battleStats.actual.ps + this.battle_movement_healing < pokemonAtaca.battleStats.ps) { pokemonAtaca.battleStats.actual.ps += this.battle_movement_healing }
+              else { pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps; }
+              if(this.battle_movement_healing > 0){
+                this.battle_health_width = await this.getPokemonPSInBattleStatHealth(pokemonRecibe, this.battle_movement_healing);
+              }
+            }else{
+              this.battle_health_width = 0;
+            }
+          }, 3100 * i)
+        } else {
+          if (!battle_movement_accuracy) {
+            if (this.battle_turn_player == 'your') {
+              this.battle_your_pokemon_animation = 'attack';
+              this.battle_enemy_pokemon_animation = 'esquiveAttack';
+            } else {
+              this.battle_your_pokemon_animation = 'esquiveAttack';
+              this.battle_enemy_pokemon_animation = 'attack';
+            }
+          }
+          if (this.battle_turn_player == 'your') {
+            this.battleMessagesLetterByLetter(`¡Tu ${this.formatNamePokemonPokedex(pokemonAtaca.name)} ha fallado!`);
+            break;
+          } else {
+            this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha fallado!`)
+            break;
+          }
+        }
     }
 
     // CONSOLES
@@ -1265,8 +1378,9 @@ export class HomeComponent {
   }
 
   getPokemonImgVH = (height: number) => {
-    if (height > 17) { height = 17; }
-    return (20 - (.8 * (13 - height))) + "vh";
+    if (height > 18) { height = 18; }
+    let size = (20 - (0.8 * (13 - height)));
+    return (Math.round(size * 100) / 100);
   }
 
   openPack = async (pack: number) => {
@@ -1288,7 +1402,7 @@ export class HomeComponent {
     if (this.shopPokemon.moves.length > 4) {
       if (this.shopPokemon.moves.length > 10) {
         while (arrayMoves.length < 4) {
-          let random = Math.floor(Math.random() * 10 + 1);
+          let random = Math.floor(Math.random() * this.shopPokemon.moves.length + 1);
           const responseMove = await fetch(this.shopPokemon.moves[random].move.url);
           const dataMove = await responseMove.json();
           !arrayMoves.includes(dataMove.id) ? arrayMoves.push(dataMove.id) : null;
@@ -1315,7 +1429,11 @@ export class HomeComponent {
       arrayMoves.push(dataMove.id);
       arrayMoves.push(dataMove.id);
     }
-    const newPokemon = await fetch(this.backendUrl + 'addPokemonToUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'pokemonId': this.shopPokemon.id, 'move1': arrayMoves[0], 'move2': arrayMoves[1], 'move3': arrayMoves[2], 'move4': arrayMoves[3] }) });
+
+    let min = 1;
+    let max = 5;
+    let lvl = Math.floor(Math.random() * (max - min + 1)) + min;
+    const newPokemon = await fetch(this.backendUrl + 'addPokemonToUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'lvl': lvl, 'pokemonId': this.shopPokemon.id, 'move1': arrayMoves[0], 'move2': arrayMoves[1], 'move3': arrayMoves[2], 'move4': arrayMoves[3] }) });
     const datanewPokemon = await newPokemon.json();
 
     const response = await fetch(this.backendUrl + 'getUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
@@ -1345,7 +1463,7 @@ export class HomeComponent {
     return false;
   }
 
-  battleDie = () => {
+  battleDie = async() => {
     this.battle_menu_show = false;
     if (this.battle_enemy_pokemon.battleStats.actual.ps <= 0) {
       if (this.battle_enemyTeam.length > 1) {
@@ -1367,6 +1485,40 @@ export class HomeComponent {
           this.battle_menu_show = true;
           this.battle_menu = 'principal';
         }, 1600);
+      }else{
+        this.battleResult = 'victory';
+
+        this.pokedexCargada = false;
+        const responseMoney = await fetch(this.backendUrl + 'newMoney.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'money': -500 }) });
+        const dataMoney = await responseMoney.json();
+        const response = await fetch(this.backendUrl + 'getUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
+        const data = await response.json();
+        localStorage.setItem("login", JSON.stringify(data[0]))
+        let loginData = localStorage.getItem("login");
+        if (loginData !== null) {
+          this.userLoged = JSON.parse(loginData);
+        } else {
+          this.userLoged = '';
+        }
+
+        for(let i = 0; i < this.battle_yourTeam.length; i++){
+          let minLvl = 30;
+          let maxLvl = 50;
+          let plusProgress = Math.floor(Math.random() * (maxLvl - minLvl + 1)) + minLvl;
+          let newProgress = Number(this.battle_yourTeam[i].unique.lvl_progress) + Number(plusProgress)
+          let lvl = this.battle_yourTeam[i].unique.lvl;
+          if(newProgress >= 100){
+            newProgress -= 100;
+            lvl++;
+          }
+          const responseLvl = await fetch(this.backendUrl + 'newLvl.php', { method: 'POST', body: JSON.stringify({ 'idPokemon': Number(this.battle_yourTeam[i].unique.id_pokemon), 'lvl': lvl, 'progress': newProgress }) });
+          const dataLvl = await responseLvl.json();
+        }
+
+        this.equipoPokemonsUsuarios = [];
+        this.getUserTeam();
+        this.pokedexCargada = true;
+        this.setSection("final");
       }
     } else if (this.battle_your_pokemon.battleStats.actual.ps <= 0) {
       if (this.battle_yourTeam.length > 1) {
@@ -1395,9 +1547,65 @@ export class HomeComponent {
           this.battle_menu_show = true;
           this.battle_menu = 'principal';
         }, 1600);
+      }else{
+        this.battleResult = 'defeat';
+
+        this.pokedexCargada = false;
+        const responseMoney = await fetch(this.backendUrl + 'newMoney.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'money': -200 }) });
+        const dataMoney = await responseMoney.json();
+        const response = await fetch(this.backendUrl + 'getUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
+        const data = await response.json();
+        localStorage.setItem("login", JSON.stringify(data[0]))
+        let loginData = localStorage.getItem("login");
+        if (loginData !== null) {
+          this.userLoged = JSON.parse(loginData);
+        } else {
+          this.userLoged = '';
+        }
+
+        for(let i = 0; i < this.battle_yourTeam.length; i++){
+          let minLvl = 10;
+          let maxLvl = 25;
+          let plusProgress = Math.floor(Math.random() * (maxLvl - minLvl + 1)) + minLvl;
+          let newProgress = Number(this.battle_yourTeam[i].unique.lvl_progress) + Number(plusProgress)
+          let lvl = this.battle_yourTeam[i].unique.lvl;
+          if(newProgress >= 100){
+            newProgress -= 100;
+            lvl++;
+          }
+          const responseLvl = await fetch(this.backendUrl + 'newLvl.php', { method: 'POST', body: JSON.stringify({ 'idPokemon': Number(this.battle_yourTeam[i].unique.id_pokemon), 'lvl': lvl, 'progress': newProgress }) });
+          const dataLvl = await responseLvl.json();
+        }
+
+        this.equipoPokemonsUsuarios = [];
+        this.getUserTeam();
+        this.pokedexCargada = true;
+        this.setSection("final");
       }
     }
   }
 
+  deletePokemon = async() => {
+    this.pokedexCargada = false;
+    const responseDelete = await fetch(this.backendUrl + 'deleteUserPokemon.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'idPokemon': this.pokemonDatos.unique.id_pokemon }) });
+    const dataDelete = await responseDelete.json();
+    const responseMoney = await fetch(this.backendUrl + 'newMoney.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'money': -200 }) });
+    const dataMoney = await responseMoney.json();
+    const response = await fetch(this.backendUrl + 'getUser.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
+    const data = await response.json();
+    localStorage.setItem("login", JSON.stringify(data[0]))
+    let loginData = localStorage.getItem("login");
+    if (loginData !== null) {
+      this.userLoged = JSON.parse(loginData);
+    } else {
+      this.userLoged = '';
+    }
+    this.listadoPokemonsUsuarios = [];
+    this.equipoPokemonsUsuarios = [];
+    this.pokemonBanquillo = [];
+
+    await this.setUserPokemons();
+    this.goToPokemonDatos(this.pokemonDatos,-1);
+  }
 }
 

@@ -25,22 +25,45 @@ export class LoginComponent {
     }
   }
 
+  doMobileVersion = () => {
+    // Verificar si el navegador admite el modo pantalla completa
+    if (!document.fullscreenEnabled) {
+      return;
+    }
+  
+    // Verificar si ya estamos en pantalla completa
+    if (document.fullscreenElement) {
+      return;
+    }
+  
+    // Verificar si la función puede ser llamada en este momento
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen()
+    } else {
+    }
+  };
+
   login = () => {
+    if (/Mobi/.test(navigator.userAgent)) {
+      this.doMobileVersion();
+    }
+  
     const myInit = {
       method: 'POST',
       body: JSON.stringify({nickname: this.nickname, password: this.password}) 
     }
+  
     fetch(this.backendUrl+'login.php', myInit)
       .then(response => response.json())
       .then(data => {
         if(data) {
-          localStorage.setItem("login",JSON.stringify(data[0]));
+          localStorage.setItem('login', JSON.stringify(data[0]));
           this.router.navigate([this.baseUrl+'/game']);
-        }else{
+        } else {
           this.error = 'The nickname or password is not correct.';
         }
       })
-  }
+  };
 
   register = () => {
     this.router.navigate([this.baseUrl+'/register']);

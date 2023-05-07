@@ -12,6 +12,7 @@ export class MenuComponent {
   baseUrl = (environment.production) ? environmentProd.baseUrl : environment.baseUrl;
 
   @Input() userLoged:any;
+  @Input() lastSection:any = '';
   @Input() activeMenuHome:string = '';
   @Output() activeMenu = new EventEmitter();
 

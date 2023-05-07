@@ -7,14 +7,6 @@
         <img class="moneyGangIcon" src="{{baseUrl}}assets/media/topMenu_diamondIcon.svg">
         {{userLoged.money}}
     </li>
-    
-    <!-- 
-    <li>
-        <img *ngIf="activeSection == 'home'" src="{{baseUrl}}assets/media/topMenu_notificationIconBlack.svg">
-        <img *ngIf="activeSection !== 'home'" src="{{baseUrl}}assets/media/topMenu_notificationIcon.svg">
-    </li>
-    -->
-
     <li (click)="toggleMenu()">
         <img *ngIf="activeSection == 'home'" src="{{baseUrl}}assets/media/topMenu_menuIconBlack.svg">
         <img *ngIf="activeSection !== 'home'" src="{{baseUrl}}assets/media/topMenu_menuIcon.svg">

@@ -34,6 +34,7 @@ input[type="text"] {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  height: 35vh;
 }
 
 .pokemonInPokedex>.pokemonInPokedexImg>img {
@@ -94,13 +95,12 @@ input[type="text"] {
 }
 
 .pokemonDatos {
-  width: 32.5%;
+  width: 28.5%;
   border: 0px solid black;
   border-radius: 10px;
   background-color: #d9d9d9;
   padding: 1%;
   font-size: 0.8rem;
-  margin-left: -1.5%;
   height: 450px;
   display: flex;
   align-items: center;
@@ -153,7 +153,7 @@ input[type="text"] {
 }
 
 .pokemonDatosPokemonList {
-  width: 20.41666%;
+  width: 19.41666%;
   border: 0px solid black;
   margin-left: 1%;
 }
@@ -163,7 +163,7 @@ input[type="text"] {
   height: 80px;
   background-color: #d9d9d9;
   border-radius: 10px;
-  margin-bottom: 2%;
+  margin-bottom: 2vh;
   display: flex;
   cursor: pointer;
   align-items: center;
@@ -249,7 +249,7 @@ input[type="text"] {
   position: absolute;
   top: 0;
   left: 0;
-  background: url("../../../assets/media/background.png");
+  background: url("../../../assets/media/battleBackgrounds/5.png");
   background-size: cover;
   z-index: 0;
 }
@@ -307,6 +307,7 @@ input[type="text"] {
   font-size: 0.65rem;
   margin-left: 1%;
   font-weight: bold;
+  color: var(--second-bg-color)
 }
 
 .pokemonInBattleMenuButtonOverlay>.pokemonInBattleOverlaysTop>.pokemonInBattleOverlaysDato>svg {
@@ -338,8 +339,7 @@ input[type="text"] {
 }
 
 .pokemonInBattleMenuButton {
-  width: 180px;
-  height: 55px;
+  height: 7vh;
   display: flex;
   border-radius: 5px;
   font-size: 0.8rem;
@@ -355,8 +355,8 @@ input[type="text"] {
 }
 
 .pokemonInBattleMenuButton>.pokemonInBattleMenuButtonTypeBox {
-  width: 39px;
-  height: 39px;
+  width: 5vh;
+  height: 5vh;
   border-radius: 10px;
   background-color: #242424;
   display: flex;
@@ -367,13 +367,13 @@ input[type="text"] {
 }
 
 .pokemonInBattleMenuButton>.pokemonInBattleMenuButtonTypeBox>.pokemonInBattleMenuButtonTypeImg {
-  width: 27px;
-  height: 27px;
+  width: 50%;
+  height: 50%;
 }
 
 .pokemonInBattleMenuButton>.pokemonInBattleMenuButtonTypeBox>.pokemonInBattleMenuButtonTypeIcon {
-  width: 21px;
-  height: 21px;
+  width: 50%;
+  height: 50%;
   fill: #fff;
 }
 
@@ -396,9 +396,10 @@ input[type="text"] {
 
 .pokemonInBattleHudBox {
   position: absolute;
-  top: 25vh;
+  top: 15vh;
   left: 10%;
   width: 80%;
+  height: 50vh;
 }
 
 .pokemonInBattlePokemonHud {
@@ -407,6 +408,8 @@ input[type="text"] {
   width: 20vw;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  color: var(--second-bg-color)
 }
 
 .pokemonInBattlePokemonHud>div>.pokemonInBattlePokemonPSBox {
@@ -622,13 +625,14 @@ input[type="text"] {
 .mini {
   top: 0;
   position: relative;
-  width: calc(12.8vw * 0.8125);
-  height: 12.8vw;
+  width: calc(12.7vw * 0.8125);
+  height: 12.7vw;
   border: 0.5vh solid white;
   margin-top: 2.5vw;
   animation-name: pokemonInBanquillo;
   animation-duration: 0.5s;
   animation-fill-mode: forwards;
+  cursor: pointer;
 }
 
 .mini:not(:nth-child(4n)) {
@@ -655,7 +659,7 @@ input[type="text"] {
 
 .pokeballOpeningPokemon .miniimg {
   margin: 0;
-  height: 70%;
+  width: 18vh;
   margin-top: 5%;
 }
 
@@ -989,7 +993,7 @@ section {
   height: 10vh;
   position: absolute;
   bottom: 10vh;
-  left: 0;
+  left: -1vh;
   padding: 0;
   margin: 0;
   z-index: 2;
@@ -1176,6 +1180,171 @@ section {
   background-position: 0 -25vh;
 }
 
+.finalBackground {
+  background-image: url("../../../assets/media/final_background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 0 -25vh;
+}
+
+.oak_image {
+  position: absolute;
+  bottom: 30vh;
+  right: 10vh;
+  height: 50vh;
+  animation-name: oakEnter;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+.oak_background {
+  background-color: rgba(0,0,0,0.8);
+  color: var(--second-bg-color);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 50vw;
+  height: 30vh;
+  animation-name: oakEnter;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  font-family: "Germania One", cursive;
+  font-size: 3vh;
+  padding: 2vh 9vh;
+  border-top-left-radius: 1.5vh;
+  border: 0.5vh solid var(--second-bg-color);
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.finalBox {
+  position: absolute;
+  width: 35vw;
+  left: 10vh;
+  top: 10vh;
+  background-color: rgba(217, 217, 217, 0.6);
+  border-radius: 1vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2vh;
+} 
+
+.finalPokemonBox {
+  width: 100%;
+  height: 11vh;
+  padding: 1vh 3vh;
+  border-radius: 0.5vh;
+  background-color: var(--main-bg-color);
+  display: flex;
+  align-items: center;
+  color: var(--second-bg-color);
+  text-transform: uppercase;
+  font-family: "Germania One", cursive;
+  font-size: 4vh;
+  margin-bottom: 1vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.finalPokemonBox:last-child {
+  margin-bottom: 0;
+}
+
+.finalPokemonBox > img {
+  width: 10%;
+}
+
+.finalPokemonBox > p {
+  margin: 0;
+  margin-left: 2vh;
+}
+
+.finalPokemonLvlBack {
+  width: 50%;
+  height: 20%;
+  background-color: var(--second-bg-color);
+  margin-left: 1vh;
+  border-radius: 20px;
+  position: absolute;
+  right: 2vh;
+  overflow: hidden
+}
+
+.finalPokemonBox > span {
+  color: #95B4FF;
+  position: absolute;
+  right: calc(50% + 3vh)
+}
+
+.finalPokemonLvlFill {
+  background-color: #95B4FF;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  height: 100%;
+  width: 20%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation-name: progressBar;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes progressBar {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(0)
+  }
+}
+
+.oak_noX {
+  padding: 2vh;
+}
+
+.oak_background > h2 {
+  font-size: 4vh;
+  margin-bottom: 2vh;
+  text-decoration: underline;
+}
+
+.oak_close {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1vh 2vh;
+  border-right: 0.5vh solid var(--second-bg-color);
+  border-bottom-right-radius: 1.5vh;
+  border-bottom: 0.5vh solid var(--second-bg-color);
+  cursor: pointer;
+}
+
+@keyframes oakEnter {
+  0% {
+    transform: translateX(50vw);
+  }
+  100% {
+    transform: translateX(0vw);
+  }
+}
+
+.oakOut {
+  animation-name: oakOut;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+@keyframes oakOut {
+  0% {
+    transform: translateX(0vw);
+  }
+  100% {
+    transform: translateX(50vw);
+  }
+}
+
 .teamPestanya {
   width: 55vw;
   background-color: rgba(0, 0, 0, 0.7);
@@ -1183,6 +1352,7 @@ section {
   position: absolute;
   right: 0;
   padding: 5vh;
+  overflow-y: auto;
 }
 
 .teamPestanyaCerrar {
@@ -1252,6 +1422,7 @@ section {
   position: relative;
   display: flex;
   justify-content: center;
+  cursor: pointer;
 }
 
 .teamEquipoPokemonBox>img {
@@ -1596,6 +1767,22 @@ section {
   width: 70vh;
 }
 
+.pokeballBattle {
+  display: flex;
+  position: absolute;
+  right: 5vh;
+  justify-content: flex-end;
+  bottom: 20.1vh;
+  height: 5vh;
+}
+
+.pokeballBattleOff,
+.pokeballBattleOn {
+  width: 5vh;
+  height: 5vh;
+  margin-left: 0.1vh;
+}
+
 /* PARTICULAS EFECTO */
 .containerBox {
   width: 100vw;
@@ -1691,8 +1878,17 @@ section {
 
 /* PRECARGA DE IMAGENES */
 .precargar-imagenes {
-  background-image: url("../../../assets/media/background.png"),
-    url("../../../assets/media/home_background.png"),
+  background-image: url("../../../assets/media/home_background.png"),
     url("../../../assets/media/shop_background.png"),
-    url("../../../assets/media/team_background.svg");
+    url("../../../assets/media/team_background.svg"),
+    url("../../../assets/media/battleBackgrounds/1.png"),
+    url("../../../assets/media/battleBackgrounds/2.png"),
+    url("../../../assets/media/battleBackgrounds/3.png"),
+    url("../../../assets/media/battleBackgrounds/4.png"),
+    url("../../../assets/media/battleBackgrounds/5.png"),
+    url("../../../assets/media/battleBackgrounds/6.png"),
+    url("../../../assets/media/battleBackgrounds/7.png"),
+    url("../../../assets/media/battleBackgrounds/8.png"),
+    url("../../../assets/media/battleBackgrounds/9.png"),
+    url("../../../assets/media/battleBackgrounds/10.png");
 }
