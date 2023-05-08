@@ -44,10 +44,10 @@ export class HomeComponent {
   listadoPokemonsUsuarios: Array<any> = [];
   equipoPokemonsUsuarios: Array<any> = [];
 
-  activeSection: string = 'home';
+  activeSection: string = 'pokedex';
 
   // OAK //
-  homeMessageNoTeam:boolean = false;
+  homeMessageNoTeam: boolean = false;
 
   // POKEDEX //
   pokedexInputSearch: string = '';
@@ -64,7 +64,7 @@ export class HomeComponent {
   pokemonDatosStatsChart: any;
   pokemonDatosStatsChartGenerated: boolean = false;
   pokemonDatosMoves: Array<any> = [];
-  pokemonDatosLastSection:string = '';
+  pokemonDatosLastSection: string = '';
 
   // TEAM
   pokemonTeam: any = '';
@@ -110,16 +110,20 @@ export class HomeComponent {
   battle_messages: string = '';
   battle_priority: string = '';
   battleEndTurn: boolean = false;
-  battleResult:string = '';
-  battle_enemyTeamPrincipio:number = 0;
+  battleResult: string = '';
+  battle_enemyTeamPrincipio: number = 0;
   battle_movement_healing = 0
   battle_movement_drain: Array<number> = [];
-  backgroundStyle:any;
+  backgroundStyle: any;
   @ViewChildren('combatTooltips') combatTooltips: ElementRef[] = [];;
 
-  constructor(private chatgpt: ChatGptApiService, private elementRef: ElementRef, private renderer: Renderer2, private router : Router) {
-    if(!localStorage.getItem("login")){ 
-      this.router.navigate([this.baseUrl+'']);
+  /* MOVIL VERSION */
+  movil:boolean = false;
+  correctOrientation:boolean = false;
+
+  constructor(private chatgpt: ChatGptApiService, private elementRef: ElementRef, private renderer: Renderer2, private router: Router) {
+    if (!localStorage.getItem("login")) {
+      this.router.navigate([this.baseUrl + '']);
     }
     const loginData = localStorage.getItem('login');
     if (loginData !== null) {
@@ -130,12 +134,36 @@ export class HomeComponent {
   }
 
   async ngOnInit() {
+    this.doMobileVersion();
     //console.log('environment.production:', environment.production);
     //console.log('baseUrl:', this.baseUrl);
     await this.setAllPokemons();
     await this.setUserPokemons();
     await this.getUserTeam();
     await this.getUserBanquillo();
+  }
+
+  @HostListener('window:orientationchange', ['$event'])
+  onOrientationChange(event: Event) {
+    console.log("CAMBIO DE ORIENTACION");
+    this.doMobileVersion();
+  }
+
+  doMobileVersion = () => {
+    if (/Mobi/.test(navigator.userAgent)) {
+      console.log("MOVIL")
+      this.movil = true;
+      const mediaQuery = window.matchMedia('(orientation: portrait)');
+      if (mediaQuery.matches) {
+        this.correctOrientation = false;
+        console.log('El dispositivo está en orientación vertical');
+      } else {
+        this.correctOrientation = true;
+        console.log('El dispositivo está en orientación horizontal');
+      }
+    }else{
+      this.movil = false;
+    }
   }
 
   setAllPokemons = async () => {
@@ -242,7 +270,7 @@ export class HomeComponent {
     return data;
   }
 
-  closeOakHome = (oak:number) => {
+  closeOakHome = (oak: number) => {
     document.getElementsByClassName('oak_image')[oak].classList.add("oakOut");
     document.getElementsByClassName('oak_background')[oak].classList.add("oakOut");
     setTimeout(() => {
@@ -251,13 +279,13 @@ export class HomeComponent {
   }
 
   setSection = async (seccion: string) => {
-    if(this.equipoPokemonsUsuarios.length > 0 && seccion == 'battle'){
+    if (this.equipoPokemonsUsuarios.length > 0 && seccion == 'battle') {
       this.activeSection = seccion;
       this.battle();
-    }else{
-      if(this.equipoPokemonsUsuarios.length <= 0 && seccion == 'battle'){
+    } else {
+      if (this.equipoPokemonsUsuarios.length <= 0 && seccion == 'battle') {
         this.homeMessageNoTeam = true;
-      }else{
+      } else {
         this.activeSection = seccion;
       }
     }
@@ -280,7 +308,7 @@ export class HomeComponent {
       this.backgroundStyle = `url('${this.baseUrl}/pokemon/assets/media/battleBackgrounds/${randomBackground}.png')`;
     }
 
-    if (seccion = 'pokedex'){
+    if (seccion = 'pokedex') {
       this.listadoPokemonsUsuarios = [];
       await this.setUserPokemons();
     }
@@ -329,7 +357,7 @@ export class HomeComponent {
         if (this.pokedexTiposSelected.includes(tipoPokemon.type.name)) { mostrarTipo = true; }
       })
       if (pokemon.name.includes(this.pokedexInputSearch.toLowerCase())) { mostrarNombre = true; }
-      if (this.comprobarPokemonCaptured(pokemon.id)){ mostrarCaptured = true; }
+      if (this.comprobarPokemonCaptured(pokemon.id)) { mostrarCaptured = true; }
       if (this.pokedexTiposSelected.length <= 0) { mostrarTipo = true }
       if (mostrarNombre && mostrarTipo) { newPokedexList.push(pokemon); }
       mostrarTipo = false;
@@ -375,8 +403,8 @@ export class HomeComponent {
     let min = this.equipoPokemonsUsuarios.length - 1;
     let max = this.equipoPokemonsUsuarios.length + 1;
     let randomIntegrantes = Math.floor(Math.random() * (max - min + 1)) + min;
-    if(randomIntegrantes <= 0){ randomIntegrantes = 1; }
-    if(randomIntegrantes >= 7){ randomIntegrantes = 6; }
+    if (randomIntegrantes <= 0) { randomIntegrantes = 1; }
+    if (randomIntegrantes >= 7) { randomIntegrantes = 6; }
     this.battle_enemyTeamPrincipio = randomIntegrantes;
     min = nivelMedio - 2;
     if (min <= 0) { min = 1; }
@@ -628,7 +656,7 @@ export class HomeComponent {
     }
   }
 
-  getWidthLvl = (pokemon:any) => {
+  getWidthLvl = (pokemon: any) => {
     return pokemon.unique.lvl_progress + "%";
   }
 
@@ -652,7 +680,7 @@ export class HomeComponent {
   goToPokemonDatos = async (pokemon: any, selected: number, lastSection = 'recharge') => {
     this.pokedexCargada = false;
 
-    if(lastSection !== 'recharge'){
+    if (lastSection !== 'recharge') {
       this.pokemonDatosLastSection = lastSection
     }
     this.deleteStatsChart();
@@ -663,23 +691,23 @@ export class HomeComponent {
     this.pokemonListadoPokemonsRepetidos = this.getPokemonsDatosRepeats();
     this.pokemonDatosSelected = selected;
     this.pokemonDatosMoves = [];
-    if(this.pokemonDatosSelected != -1){
+    if (this.pokemonDatosSelected != -1) {
       let pokemonUser = await this.getUserPokemonById(this.pokemonDatos.unique.id);
       this.pokemonDatosMoves.push(await this.getMoves(pokemonUser[0].move_one));
       this.pokemonDatosMoves.push(await this.getMoves(pokemonUser[0].move_two));
       this.pokemonDatosMoves.push(await this.getMoves(pokemonUser[0].move_three));
       this.pokemonDatosMoves.push(await this.getMoves(pokemonUser[0].move_four));
-    }else{
-      for(let i = 0; i < 4; i++){
-        if(this.pokemonDatos.moves[i] != undefined){
+    } else {
+      for (let i = 0; i < 4; i++) {
+        if (this.pokemonDatos.moves[i] != undefined) {
           this.pokemonDatosMoves.push(await this.getMovesByUrl(this.pokemonDatos.moves[i].move.url));
-        }else{
+        } else {
           this.pokemonDatosMoves.push(await this.getMovesByUrl(this.pokemonDatos.moves[0].move.url));
         }
       }
     }
-    
-    if(pokemon.unique != undefined){
+
+    if (pokemon.unique != undefined) {
       if (pokemon.unique.id != undefined) {
         let pokemonApi = await this.getPokemonById(pokemon.id);
         let pokemonBBDD = await this.getUserPokemonById(pokemon.unique.id);
@@ -689,7 +717,7 @@ export class HomeComponent {
         this.getStatsChart();
       }
     }
-    
+
     this.pokedexCargada = true;
   }
 
@@ -870,13 +898,13 @@ export class HomeComponent {
   }
 
   getPokemonPSInBattleStatHealth = (pokemon: any, health: number) => {
-    if(health > 0){
+    if (health > 0) {
       if (health >= pokemon.battleStats.actual.ps) { return (pokemon.battleStats.actual.ps * 100) / pokemon.battleStats.ps; }
       if (health != 0) {
         return (health * 100) / pokemon.battleStats.ps;
       }
     }
-    
+
     return 0;
   }
 
@@ -1213,11 +1241,11 @@ export class HomeComponent {
       this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha usado ${movementRealizado.names[5].name}!`)
     }
 
-    if(battle_movement_hits == null){ battle_movement_hits = 1; }
+    if (battle_movement_hits == null) { battle_movement_hits = 1; }
     for (let i = 0; i < battle_movement_hits; i++) {
       // check accuracy
       let battle_movement_accuracy = Math.random() * 100 < movementRealizado.accuracy;
-      if(movementRealizado.accuracy == null){ battle_movement_accuracy = true }
+      if (movementRealizado.accuracy == null) { battle_movement_accuracy = true }
 
       if (battle_movement_accuracy && !battle_movement_paralisis && !battle_movement_freeze) {
 
@@ -1257,68 +1285,68 @@ export class HomeComponent {
           this.battle_enemy_pokemon_animation = 'attack';
         }
 
-          setTimeout(() => {
-            this.battle_your_pokemon_animation = 'wait';
-            this.battle_enemy_pokemon_animation = 'wait';
-          }, 3000 * i)
+        setTimeout(() => {
+          this.battle_your_pokemon_animation = 'wait';
+          this.battle_enemy_pokemon_animation = 'wait';
+        }, 3000 * i)
 
-          setTimeout(async () => {
-            if (this.battle_turn_player == 'your') {
-              this.battle_your_pokemon_animation = 'attack';
-              this.battle_enemy_pokemon_animation = 'receiveAttack';
+        setTimeout(async () => {
+          if (this.battle_turn_player == 'your') {
+            this.battle_your_pokemon_animation = 'attack';
+            this.battle_enemy_pokemon_animation = 'receiveAttack';
+          } else {
+            this.battle_your_pokemon_animation = 'receiveAttack';
+            this.battle_enemy_pokemon_animation = 'attack';
+          }
+          // METEMOS DAÑO AL ENEMIGO
+          this.battle_damage_width = await this.getPokemonPSInBattleStatDamage(pokemonRecibe, this.battle_damage[i]);
+          if (this.battle_damage[i] >= pokemonRecibe.battleStats.actual.ps) { pokemonRecibe.battleStats.actual.ps = 0; }
+          else { pokemonRecibe.battleStats.actual.ps -= this.battle_damage[i]; }
+
+          // METEMOS DRAIN EN CASO QUE HAYA
+          if (this.battle_movement_drain[i]) {
+            if (pokemonAtaca.battleStats.actual.ps + this.battle_movement_drain[i] < pokemonAtaca.battleStats.ps) {
+              pokemonAtaca.battleStats.actual.ps += this.battle_movement_drain[i];
             } else {
-              this.battle_your_pokemon_animation = 'receiveAttack';
-              this.battle_enemy_pokemon_animation = 'attack';
+              pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps;
             }
-            // METEMOS DAÑO AL ENEMIGO
-            this.battle_damage_width = await this.getPokemonPSInBattleStatDamage(pokemonRecibe, this.battle_damage[i]);
-            if (this.battle_damage[i] >= pokemonRecibe.battleStats.actual.ps) { pokemonRecibe.battleStats.actual.ps = 0; }
-            else { pokemonRecibe.battleStats.actual.ps -= this.battle_damage[i]; }
-
-            // METEMOS DRAIN EN CASO QUE HAYA
-            if (this.battle_movement_drain[i]) {
-              if (pokemonAtaca.battleStats.actual.ps + this.battle_movement_drain[i] < pokemonAtaca.battleStats.ps) {
-                pokemonAtaca.battleStats.actual.ps += this.battle_movement_drain[i];
-              } else {
-                pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps;
-              }
-              if(this.battle_movement_drain[i] > 0) {
-                this.battle_damageDrain_width = 0;
-                this.battle_health_width = await this.getPokemonPSInBattleStatHealth(pokemonRecibe, this.battle_movement_drain[i]);
-              }else if(this.battle_movement_drain[i] < 0){
-                this.battle_damageDrain_width = await this.getPokemonPSInBattleStatDamage(pokemonRecibe, -(this.battle_movement_drain[i]));
-              }
-            }
-
-            // METEMOS HEALTH EN CASO QUE HAYA
-            if (this.battle_movement_healing > 0) {
-              if(pokemonAtaca.battleStats.actual.ps + this.battle_movement_healing < pokemonAtaca.battleStats.ps) { pokemonAtaca.battleStats.actual.ps += this.battle_movement_healing }
-              else { pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps; }
-              if(this.battle_movement_healing > 0){
-                this.battle_health_width = await this.getPokemonPSInBattleStatHealth(pokemonRecibe, this.battle_movement_healing);
-              }
-            }else{
-              this.battle_health_width = 0;
-            }
-          }, 3100 * i)
-        } else {
-          if (!battle_movement_accuracy) {
-            if (this.battle_turn_player == 'your') {
-              this.battle_your_pokemon_animation = 'attack';
-              this.battle_enemy_pokemon_animation = 'esquiveAttack';
-            } else {
-              this.battle_your_pokemon_animation = 'esquiveAttack';
-              this.battle_enemy_pokemon_animation = 'attack';
+            if (this.battle_movement_drain[i] > 0) {
+              this.battle_damageDrain_width = 0;
+              this.battle_health_width = await this.getPokemonPSInBattleStatHealth(pokemonRecibe, this.battle_movement_drain[i]);
+            } else if (this.battle_movement_drain[i] < 0) {
+              this.battle_damageDrain_width = await this.getPokemonPSInBattleStatDamage(pokemonRecibe, -(this.battle_movement_drain[i]));
             }
           }
-          if (this.battle_turn_player == 'your') {
-            this.battleMessagesLetterByLetter(`¡Tu ${this.formatNamePokemonPokedex(pokemonAtaca.name)} ha fallado!`);
-            break;
+
+          // METEMOS HEALTH EN CASO QUE HAYA
+          if (this.battle_movement_healing > 0) {
+            if (pokemonAtaca.battleStats.actual.ps + this.battle_movement_healing < pokemonAtaca.battleStats.ps) { pokemonAtaca.battleStats.actual.ps += this.battle_movement_healing }
+            else { pokemonAtaca.battleStats.actual.ps = pokemonAtaca.battleStats.ps; }
+            if (this.battle_movement_healing > 0) {
+              this.battle_health_width = await this.getPokemonPSInBattleStatHealth(pokemonRecibe, this.battle_movement_healing);
+            }
           } else {
-            this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha fallado!`)
-            break;
+            this.battle_health_width = 0;
+          }
+        }, 3100 * i)
+      } else {
+        if (!battle_movement_accuracy) {
+          if (this.battle_turn_player == 'your') {
+            this.battle_your_pokemon_animation = 'attack';
+            this.battle_enemy_pokemon_animation = 'esquiveAttack';
+          } else {
+            this.battle_your_pokemon_animation = 'esquiveAttack';
+            this.battle_enemy_pokemon_animation = 'attack';
           }
         }
+        if (this.battle_turn_player == 'your') {
+          this.battleMessagesLetterByLetter(`¡Tu ${this.formatNamePokemonPokedex(pokemonAtaca.name)} ha fallado!`);
+          break;
+        } else {
+          this.battleMessagesLetterByLetter(`¡El ${this.formatNamePokemonPokedex(pokemonAtaca.name)} enemigo ha fallado!`)
+          break;
+        }
+      }
     }
 
     // CONSOLES
@@ -1463,13 +1491,13 @@ export class HomeComponent {
     return false;
   }
 
-  battleDie = async() => {
+  battleDie = async () => {
     this.battle_menu_show = false;
     if (this.battle_enemy_pokemon.battleStats.actual.ps <= 0) {
       if (this.battle_enemyTeam.length > 1) {
         this.battle_enemy_pokemon_animation = 'die';
         this.battle_your_pokemon_animation = 'idle';
-        setTimeout(async() => {
+        setTimeout(async () => {
           this.battle_menu_show = false;
           this.battle_enemyTeam.splice(0, 1);
           this.battle_enemy_pokemon = this.battle_enemyTeam[0];
@@ -1485,7 +1513,7 @@ export class HomeComponent {
           this.battle_menu_show = true;
           this.battle_menu = 'principal';
         }, 1600);
-      }else{
+      } else {
         this.battleResult = 'victory';
 
         this.pokedexCargada = false;
@@ -1501,13 +1529,13 @@ export class HomeComponent {
           this.userLoged = '';
         }
 
-        for(let i = 0; i < this.battle_yourTeam.length; i++){
+        for (let i = 0; i < this.battle_yourTeam.length; i++) {
           let minLvl = 30;
           let maxLvl = 50;
           let plusProgress = Math.floor(Math.random() * (maxLvl - minLvl + 1)) + minLvl;
           let newProgress = Number(this.battle_yourTeam[i].unique.lvl_progress) + Number(plusProgress)
           let lvl = this.battle_yourTeam[i].unique.lvl;
-          if(newProgress >= 100){
+          if (newProgress >= 100) {
             newProgress -= 100;
             lvl++;
           }
@@ -1547,7 +1575,7 @@ export class HomeComponent {
           this.battle_menu_show = true;
           this.battle_menu = 'principal';
         }, 1600);
-      }else{
+      } else {
         this.battleResult = 'defeat';
 
         this.pokedexCargada = false;
@@ -1563,13 +1591,13 @@ export class HomeComponent {
           this.userLoged = '';
         }
 
-        for(let i = 0; i < this.battle_yourTeam.length; i++){
+        for (let i = 0; i < this.battle_yourTeam.length; i++) {
           let minLvl = 10;
           let maxLvl = 25;
           let plusProgress = Math.floor(Math.random() * (maxLvl - minLvl + 1)) + minLvl;
           let newProgress = Number(this.battle_yourTeam[i].unique.lvl_progress) + Number(plusProgress)
           let lvl = this.battle_yourTeam[i].unique.lvl;
-          if(newProgress >= 100){
+          if (newProgress >= 100) {
             newProgress -= 100;
             lvl++;
           }
@@ -1585,7 +1613,7 @@ export class HomeComponent {
     }
   }
 
-  deletePokemon = async() => {
+  deletePokemon = async () => {
     this.pokedexCargada = false;
     const responseDelete = await fetch(this.backendUrl + 'deleteUserPokemon.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'idPokemon': this.pokemonDatos.unique.id_pokemon }) });
     const dataDelete = await responseDelete.json();
@@ -1605,7 +1633,7 @@ export class HomeComponent {
     this.pokemonBanquillo = [];
 
     await this.setUserPokemons();
-    this.goToPokemonDatos(this.pokemonDatos,-1);
+    this.goToPokemonDatos(this.pokemonDatos, -1);
   }
 }
 

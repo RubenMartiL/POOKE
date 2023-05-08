@@ -132,20 +132,20 @@
                             <div class="pokemonInBattlePokemonLifeBarBox">
                                 <div class="pokemonInBattlePokemonLifeBarBoxText">
                                     <span *ngIf="battle_your_pokemon.unique">
-                                        <p *ngIf="battle_your_pokemon.unique.name != null" class="d-flex align-items-center">
+                                        <p *ngIf="battle_your_pokemon.unique.name != null" class="d-flex flex-end">
                                             {{formatNamePokemonPokedex(battle_your_pokemon.unique.name)}}
                                             <!-- 
                                                 <img *ngIf="getState(battle_your_pokemon,'burn')" style="width: 3vh" src="{{baseUrl}}assets/media/battle_state_fire.png"/>
                                             -->
                                         </p>
-                                        <p *ngIf="battle_your_pokemon.unique.name == null" class="d-flex align-items-center">
+                                        <p *ngIf="battle_your_pokemon.unique.name == null" class="d-flex flex-end">
                                             {{formatNamePokemonPokedex(battle_your_pokemon.name)}}
                                             <!-- 
                                                 <img *ngIf="getState(battle_your_pokemon,'burn')" style="width: 3vh" src="{{baseUrl}}assets/media/battle_state_fire.png"/>
                                             -->
                                         </p>
                                     </span>
-                                    <p *ngIf="!battle_your_pokemon.unique" class="d-flex align-items-center">
+                                    <p *ngIf="!battle_your_pokemon.unique" class="d-flex flex-end">
                                         {{formatNamePokemonPokedex(battle_your_pokemon.unique.name)}}
                                         <!-- 
                                             <img *ngIf="getState(battle_your_pokemon,'burn')" style="width: 3vh" src="{{baseUrl}}assets/media/battle_state_fire.png"/>
@@ -192,7 +192,7 @@
                             </div>
                             <div class="pokemonInBattlePokemonLifeBarBox">
                                 <div class="pokemonInBattlePokemonLifeBarBoxText">
-                                    <p class="d-flex align-items-center">
+                                    <p class="d-flex flex-end">
                                         {{formatNamePokemonPokedex(battle_enemy_pokemon.name)}}
                                         <!-- 
                                             <img *ngIf="getState(battle_your_pokemon,'burn')" style="width: 3vh" src="{{baseUrl}}assets/media/battle_state_fire.png"/>
@@ -373,12 +373,7 @@
 <!-- POKEMON DATOS -->
 <section *ngIf="activeSection == 'perfil'" [ngClass]="{'invisible': activeSection != 'perfil'}" [style.z-index]="activeSection == 'perfil' ? 5 : 1">
     <app-menu (activeMenu)="setSection($event)" [activeMenuHome]="activeSection" [userLoged]="userLoged" [lastSection]="pokemonDatosLastSection"></app-menu>
-    <div class="sectionDownMenu">
-        <div class="d-flex align-items-center justify-content-end">
-            <button (click)="deletePokemon()" [ngClass]="{'invisible': pokemonDatosSelected == -1}" class="pokemonInBattleMenuButton me-1 justify-content-center pt-2 pb-2 ps-3 pe-3">
-                <svg height="80%" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>
-            </button>
-        </div>
+    <div class="sectionDownMenu" style="margin-top: 5vh">
         <div class="sectionDownSubMenu d-flex">
             <article class="pokemonInPokedex">
                 <div class="w-100" class="pokemonInPokedexImg"
@@ -411,18 +406,44 @@
                     Evolucionar
                 </button>
                 -->
+                <div class="pokemonDatosPokemonBox"
+                    [ngClass]="{'pokemonDatosPokemonBoxSelected': pokemonDatosSelected == -1}"
+                    (click)="goToPokemonDatos(pokemonDatosBase,-1)">
+                    <div class="pokemonDatosPokemonImg">
+                        <img src="{{pokemonDatos.sprites.other['official-artwork'].front_default}}">
+                    </div>
+                    <div class="d-flex flex-column justify-content-start">
+                        <p>{{pokemonDatos.name}}</p>
+                        <span>BASE</span>
+                    </div>
+                </div>
+                <div class="pokemonDatosPokemonBox" *ngFor="let pokemon of pokemonListadoPokemonsRepetidos; index as i"
+                    [ngClass]="{'pokemonDatosPokemonBoxSelected': pokemonDatosSelected == i}"
+                    (click)="goToPokemonDatos(pokemon,i)">
+                    <div class="pokemonDatosPokemonImg">
+                        <img src="{{pokemon.sprites.other['official-artwork'].front_default}}">
+                    </div>
+                    <div class="d-flex flex-column justify-content-start">
+                        <p *ngIf="pokemon.unique.name && pokemon.unique.name != null">{{pokemon.unique.name}}</p>
+                        <p *ngIf="!pokemon.unique.name || pokemon.unique.name == null">{{pokemon.name}}</p>
+                        <span>LVL: {{pokemon.unique.lvl}}</span>
+                    </div>
+                    <button (click)="deletePokemon()" [ngClass]="{'invisible': pokemonDatosSelected == -1 || pokemonDatosSelected != i}" class="pokemonInBattleMenuButton2 justify-content-center align-items-center">
+                        <svg height="80%" fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>
+                    </button>
+                </div>
             </article>
 
             <article class="pokemonDatos">
                 <h4 class="pokemonDatosTitle align-self-start mb-5">Estadisticas</h4>
-                <div style="height: 400px; width: 70%;" id="pokemonDatosStatsChartPadre">
+                <div style="width: 100%;" id="pokemonDatosStatsChartPadre">
                     <canvas id="pokemonDatosStatsChart">{{getStatsChart()}}</canvas>
                 </div>
             </article>
             <article class="pokemonDatosMoves">
                 <h4 class="pokemonDatosTitle">Movimientos</h4>
                 <div class="mt-2">
-                    <div *ngFor="let move of pokemonDatosMoves" class="pokemonInBattleMenuButtonOverlay mb-2 border-0">
+                    <div *ngFor="let move of pokemonDatosMoves" class="pokemonInBattleMenuButtonOverlay mb-2 border-0" style="min-width: auto;">
                         <div class="pokemonInBattleOverlaysTop">
                             <p class="w-100 text-uppercase m-0 ms-1">{{move.names[5].name}}</p>
                             <div class="pokemonInBattleOverlaysDato"
@@ -449,32 +470,6 @@
                         <div class="pokemonInBattleOverlaysBottom">
                             {{getDescriptionInSpanishMove(move)}}
                         </div>
-                    </div>
-                </div>
-            </article>
-
-            <article class="pokemonDatosPokemonList">
-                <div class="pokemonDatosPokemonBox"
-                    [ngClass]="{'pokemonDatosPokemonBoxSelected': pokemonDatosSelected == -1}"
-                    (click)="goToPokemonDatos(pokemonDatosBase,-1)">
-                    <div class="pokemonDatosPokemonImg">
-                        <img src="{{pokemonDatos.sprites.other['official-artwork'].front_default}}">
-                    </div>
-                    <div class="d-flex flex-column justify-content-start">
-                        <p>{{pokemonDatos.name}}</p>
-                        <span>BASE</span>
-                    </div>
-                </div>
-                <div class="pokemonDatosPokemonBox" *ngFor="let pokemon of pokemonListadoPokemonsRepetidos; index as i"
-                    [ngClass]="{'pokemonDatosPokemonBoxSelected': pokemonDatosSelected == i}"
-                    (click)="goToPokemonDatos(pokemon,i)">
-                    <div class="pokemonDatosPokemonImg">
-                        <img src="{{pokemon.sprites.other['official-artwork'].front_default}}">
-                    </div>
-                    <div class="d-flex flex-column justify-content-start">
-                        <p *ngIf="pokemon.unique.name && pokemon.unique.name != null">{{pokemon.unique.name}}</p>
-                        <p *ngIf="!pokemon.unique.name || pokemon.unique.name == null">{{pokemon.name}}</p>
-                        <span>LVL: {{pokemon.unique.lvl}}</span>
                     </div>
                 </div>
             </article>
@@ -665,8 +660,8 @@
                             </div>
                             <div class="pokemonInBattlePokemonLifeBarBox">
                                 <div class="pokemonInBattlePokemonLifeBarBoxText">
-                                    <p>{{formatNamePokemonPokedex('Charmander')}}</p>
-                                    <p><span>LVL</span>&nbsp;5</p>
+                                    <p class="d-flex flex-end">{{formatNamePokemonPokedex('Charmander')}}</p>
+                                    <p class="d-flex flex-end"><span>LVL</span>&nbsp;5</p>
                                 </div>
                                 <div class="pokemonInBattlePokemonHudPSBackground">
                                     <span class="pokemonInBattlePokemonHudPSStat">50/50</span>
@@ -687,8 +682,8 @@
                             </div>
                             <div class="pokemonInBattlePokemonLifeBarBox">
                                 <div class="pokemonInBattlePokemonLifeBarBoxText">
-                                    <p>{{formatNamePokemonPokedex('Bulbasaur')}}</p>
-                                    <p><span>LVL</span>&nbsp;10</p>
+                                    <p class="d-flex flex-end">{{formatNamePokemonPokedex('Bulbasaur')}}</p>
+                                    <p class="d-flex flex-end"><span>LVL</span>&nbsp;10</p>
                                 </div>
                                 <div class="pokemonInBattlePokemonHudPSBackground">
                                     <span class="pokemonInBattlePokemonHudPSStat">50/50</span>
@@ -818,3 +813,6 @@
     <img src="{{baseUrl}}assets/media/loading.gif">
 </div>
 <div class="precargar-imagenes"></div>
+
+<!-- MOVIL BLOCK -->
+<div *ngIf="movil && !correctOrientation" class="blockMovil">Por favor, gire su dispositivo movil</div>
