@@ -7,6 +7,16 @@ header("Access-Control-Allow-Headers: *");
 $datos = json_decode(file_get_contents('php://input'),true);
 $hash = password_hash($datos['pass'], PASSWORD_DEFAULT);
 
+$consulta = $conexion->prepare('SELECT * FROM users WHERE nickname = ?');
+$resultado = $consulta->execute([
+    $datos['user'],
+]);
+
+if(count($resultado) > 0){
+    echo json_encode(false);
+    return;
+}
+
 if($datos['pass'] != $datos['pass2']){
     echo json_encode(false);
     return;

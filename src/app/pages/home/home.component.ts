@@ -73,6 +73,7 @@ export class HomeComponent {
   pokemonTeam_draggedIndex: number = -1;
   dragObject: any;
   dragIndex: number = -1;
+  dragStartPosition: any;
   originalArray: any[] = [];
   teamPestanya: string = 'abierta'
 
@@ -115,11 +116,13 @@ export class HomeComponent {
   battle_movement_healing = 0
   battle_movement_drain: Array<number> = [];
   backgroundStyle: any;
+  battleMessagesLetterByLetterInUse: boolean = false;
+  messageQueue: string[] = [];
   @ViewChildren('combatTooltips') combatTooltips: ElementRef[] = [];;
 
   /* MOVIL VERSION */
-  movil:boolean = false;
-  correctOrientation:boolean = false;
+  movil: boolean = false;
+  correctOrientation: boolean = false;
 
   constructor(private chatgpt: ChatGptApiService, private elementRef: ElementRef, private renderer: Renderer2, private router: Router) {
     if (!localStorage.getItem("login")) {
@@ -161,7 +164,7 @@ export class HomeComponent {
         this.correctOrientation = true;
         console.log('El dispositivo está en orientación horizontal');
       }
-    }else{
+    } else {
       this.movil = false;
     }
   }
@@ -788,8 +791,21 @@ export class HomeComponent {
     this.originalArray = array;
   }
 
+  onTouchStart = (event: TouchEvent, obj: any, index: number, array: any[]) => {
+    this.dragObject = obj;
+    this.dragIndex = index;
+    this.originalArray = array;
+    this.dragStartPosition = event.touches[0].clientY;
+    event.stopPropagation();
+  }
+
   onDragOver = (event: DragEvent) => {
     event.preventDefault();
+  }
+
+  onTouchMove = (event: TouchEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
   }
 
   onDrop = async (event: DragEvent, targetArray: any[], sourceArray: any[]) => {
@@ -843,6 +859,60 @@ export class HomeComponent {
       this.originalArray = [];
     }, 600);
   }
+
+  onTouchEnd = async (event: TouchEvent, targetArray: any[], sourceArray: any[]) => {
+    event.preventDefault();
+    let arrayPosiciones: Array<any> = [];
+    if (this.originalArray !== targetArray && this.dragObject != null) {
+      if (this.equipoPokemonsUsuarios.length < 6 && targetArray == this.equipoPokemonsUsuarios) {
+        document.getElementById('banca' + this.dragIndex.toString())?.classList.add("pokemonOutBanquillo")
+
+        setTimeout(() => {
+          this.originalArray.splice(this.dragIndex, 1);
+          targetArray.splice(targetArray.length, 0, this.dragObject);
+          for (let index in this.equipoPokemonsUsuarios) {
+            let indice: number = parseInt(index + 1);
+            arrayPosiciones.push(indice);
+          }
+          this.guardarEquipoEnBBDD(arrayPosiciones);
+        }, 500)
+
+      } else if (targetArray != this.equipoPokemonsUsuarios) {
+        this.originalArray.splice(this.dragIndex, 1);
+        targetArray.splice(targetArray.length, 0, this.dragObject);
+        for (let index in this.equipoPokemonsUsuarios) {
+          let indice: number = parseInt(index + 1);
+          arrayPosiciones.push(indice);
+        }
+        this.guardarEquipoEnBBDD(arrayPosiciones);
+      }
+    } else if (this.originalArray == targetArray && targetArray == this.equipoPokemonsUsuarios) {
+      console.log("HOLA")
+      /*console.log("cambiar position")
+      console.log(this.dragIndex);
+      console.log(event);*/
+      if ('srcElement' in event) {
+        if ((event as any).srcElement.id) {
+          let antiguoPokemon = targetArray[(event as any).srcElement.id];
+          targetArray[(event as any).srcElement.id] = targetArray[this.dragIndex];
+          targetArray[this.dragIndex] = antiguoPokemon;
+          for (let index in this.equipoPokemonsUsuarios) {
+            let indice: number = parseInt(index + 1);
+            arrayPosiciones.push(indice);
+          }
+        }
+        this.guardarEquipoEnBBDD(arrayPosiciones);
+      }
+    }
+
+    // reset the drag variables
+    setTimeout(() => {
+      this.dragObject = null;
+      this.dragIndex = -1;
+      this.originalArray = [];
+    }, 600);
+  }
+
 
   getMoves = async (idMove: number) => {
     const response = await fetch(`https://pokeapi.co/api/v2/move/${idMove}`);
@@ -1070,14 +1140,52 @@ export class HomeComponent {
     }
   }
 
-  battleMessagesLetterByLetter = (message: string) => {
-    this.battle_messages = ""
-    let messageChar = message.split('')
-    for (let contadorLetra: number = 0; contadorLetra < message.length; contadorLetra++) {
-      setTimeout(() => {
-        this.battle_messages += messageChar[contadorLetra];
-      }, contadorLetra * 50)
+  battleMessagesLetterByLetter = (message?: string) => {
+    if(message){
+      this.messageQueue.push(message);
     }
+    if (this.messageQueue.length > 0 && !this.battleMessagesLetterByLetterInUse) {
+      // Obtener el siguiente mensaje de la cola
+      const mensajeActual = this.messageQueue.shift();
+
+      // Establecer el mensaje actual como el mensaje en uso
+      this.battle_messages = "";
+      if (mensajeActual === undefined) {
+        return;
+      }
+
+      let mensajeActualChar = mensajeActual.split('');
+      this.battleMessagesLetterByLetterInUse = true;
+
+      // Mostrar el mensaje letra por letra
+      for (let contadorLetra: number = 0; contadorLetra < mensajeActual.length; contadorLetra++) {
+        setTimeout(() => {
+          this.battle_messages += mensajeActualChar[contadorLetra];
+        }, contadorLetra * 50)
+      }
+
+      // Establecer una espera antes de procesar el siguiente mensaje
+      setTimeout(() => {
+        this.battleMessagesLetterByLetterInUse = false;
+        this.battleMessagesLetterByLetter();
+      }, (mensajeActual.length + 1) * 50);
+    }
+    // if (!this.battleMessagesLetterByLetterInUse) {
+    //   this.battle_messages = ""
+    //   let messageChar = message.split('');
+    //   console.log(message.length)
+    //   this.battleMessagesLetterByLetterInUse = true;
+    //   setTimeout(() => {
+    //     console.log("reset")
+    //     this.battleMessagesLetterByLetterInUse = false;
+    //   }, (message.length + 1) * 50);
+
+    //   for (let contadorLetra: number = 0; contadorLetra < message.length; contadorLetra++) {
+    //     setTimeout(() => {
+    //       this.battle_messages += messageChar[contadorLetra];
+    //     }, contadorLetra * 50)
+    //   }
+    // }
   }
 
   showTooltipBattle(tooltip: HTMLDivElement): void {
@@ -1145,7 +1253,9 @@ export class HomeComponent {
     this.battle_turn++;
     this.battle_turn_choose = true;
     if (!this.battleEndTurn) {
-      this.battleMessagesLetterByLetter(`¿Que deberia hacer ${this.formatNamePokemonPokedex(this.battle_your_pokemon.name)}?`)
+      setTimeout(() => {
+        this.battleMessagesLetterByLetter(`¿Que deberia hacer ${this.formatNamePokemonPokedex(this.battle_your_pokemon.name)}?`)
+      }, 1500)
     }
   }
 

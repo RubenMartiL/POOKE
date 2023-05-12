@@ -17,7 +17,8 @@ li {
     cursor: pointer;
 }
 
-li > img {
+li > img,
+li > svg {
     height: 3vh;
 }
 
