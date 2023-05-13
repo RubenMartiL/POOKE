@@ -44,7 +44,7 @@ export class HomeComponent {
   listadoPokemonsUsuarios: Array<any> = [];
   equipoPokemonsUsuarios: Array<any> = [];
 
-  activeSection: string = 'pokedex';
+  activeSection: string = 'home';
 
   // OAK //
   homeMessageNoTeam: boolean = false;
@@ -148,21 +148,17 @@ export class HomeComponent {
 
   @HostListener('window:orientationchange', ['$event'])
   onOrientationChange(event: Event) {
-    console.log("CAMBIO DE ORIENTACION");
     this.doMobileVersion();
   }
 
   doMobileVersion = () => {
     if (/Mobi/.test(navigator.userAgent)) {
-      console.log("MOVIL")
       this.movil = true;
       const mediaQuery = window.matchMedia('(orientation: portrait)');
       if (mediaQuery.matches) {
         this.correctOrientation = false;
-        console.log('El dispositivo está en orientación vertical');
       } else {
         this.correctOrientation = true;
-        console.log('El dispositivo está en orientación horizontal');
       }
     } else {
       this.movil = false;
@@ -190,6 +186,7 @@ export class HomeComponent {
   }
 
   setUserPokemons = async () => {
+    this.pokedexCargada = false;
     const urls = [this.backendUrl + 'getUserPokemons.php'];
     const fetchPromises = urls.map(async (url) => {
       const response = await fetch(url, { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname }) });
@@ -204,9 +201,11 @@ export class HomeComponent {
     });
     await Promise.all(fetchPromises);
     console.log('Cargado -> setUserPokemons');
+    this.pokedexCargada = true;
   }
 
   getUserTeam = async () => {
+    this.pokedexCargada = false;
     let userTeam: Array<any> = [];
     const urls = [this.backendUrl + 'getUserTeam.php'];
     const fetchPromises = urls.map(async (url) => {
@@ -311,7 +310,7 @@ export class HomeComponent {
       this.backgroundStyle = `url('${this.baseUrl}/pokemon/assets/media/battleBackgrounds/${randomBackground}.png')`;
     }
 
-    if (seccion = 'pokedex') {
+    if (seccion == 'pokedex') {
       this.listadoPokemonsUsuarios = [];
       await this.setUserPokemons();
     }
@@ -375,6 +374,7 @@ export class HomeComponent {
   }
 
   battle = async () => {
+    this.messageQueue = [];
     this.inBattle = false;
     this.battle_menu_show = false;
     this.pokedexCargada = false;
@@ -495,7 +495,9 @@ export class HomeComponent {
 
     this.inBattle = true;
     this.battle_menu_show = true;
-    this.pokedexCargada = true;
+    setTimeout(() => {
+      this.pokedexCargada = true;
+    }, 2000);
 
     /*
     // PASAMOS CONTEXTO A CHAT GPT
@@ -693,6 +695,7 @@ export class HomeComponent {
     this.pokemonDatos = { ...pokemon };
     this.pokemonListadoPokemonsRepetidos = this.getPokemonsDatosRepeats();
     this.pokemonDatosSelected = selected;
+
     this.pokemonDatosMoves = [];
     if (this.pokemonDatosSelected != -1) {
       let pokemonUser = await this.getUserPokemonById(this.pokemonDatos.unique.id);
@@ -887,7 +890,6 @@ export class HomeComponent {
         this.guardarEquipoEnBBDD(arrayPosiciones);
       }
     } else if (this.originalArray == targetArray && targetArray == this.equipoPokemonsUsuarios) {
-      console.log("HOLA")
       /*console.log("cambiar position")
       console.log(this.dragIndex);
       console.log(event);*/
@@ -1141,7 +1143,7 @@ export class HomeComponent {
   }
 
   battleMessagesLetterByLetter = (message?: string) => {
-    if(message){
+    if (message) {
       this.messageQueue.push(message);
     }
     if (this.messageQueue.length > 0 && !this.battleMessagesLetterByLetterInUse) {
@@ -1189,16 +1191,18 @@ export class HomeComponent {
   }
 
   showTooltipBattle(tooltip: HTMLDivElement): void {
-    const button = tooltip.previousSibling?.previousSibling;
-    if (button instanceof HTMLElement) {
-      const buttonRect = button.getBoundingClientRect();
-      if (window.innerHeight > 700) {
-        tooltip.style.top = `${buttonRect.top - (100 * window.innerHeight / 100) - (1 * window.innerHeight / 100)}px`;
-      } else {
-        tooltip.style.top = `${buttonRect.top - (100 * window.innerHeight / 100) - (2.4 * window.innerHeight / 100)}px`;
+    if (!this.movil) {
+      const button = tooltip.previousSibling?.previousSibling;
+      if (button instanceof HTMLElement) {
+        const buttonRect = button.getBoundingClientRect();
+        if (window.innerHeight > 700) {
+          tooltip.style.top = `${buttonRect.top - (100 * window.innerHeight / 100) - (1 * window.innerHeight / 100)}px`;
+        } else {
+          tooltip.style.top = `${buttonRect.top - (100 * window.innerHeight / 100) - (2.4 * window.innerHeight / 100)}px`;
+        }
+        tooltip.style.left = `${buttonRect.left - (3 * window.innerHeight / 100) - (0.2 * window.innerHeight / 100)}px`;
+        tooltip.style.display = 'flex';
       }
-      tooltip.style.left = `${buttonRect.left - (3 * window.innerHeight / 100) - (0.2 * window.innerHeight / 100)}px`;
-      tooltip.style.display = 'flex';
     }
   }
 
@@ -1725,6 +1729,10 @@ export class HomeComponent {
 
   deletePokemon = async () => {
     this.pokedexCargada = false;
+    this.pokemonDatosSelected = -1;
+    this.goToPokemonDatos(this.pokemonDatos, -1);
+    this.pokedexCargada = false;
+
     const responseDelete = await fetch(this.backendUrl + 'deleteUserPokemon.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'idPokemon': this.pokemonDatos.unique.id_pokemon }) });
     const dataDelete = await responseDelete.json();
     const responseMoney = await fetch(this.backendUrl + 'newMoney.php', { method: 'POST', body: JSON.stringify({ 'nickname': this.userLoged.nickname, 'money': -200 }) });
@@ -1741,9 +1749,10 @@ export class HomeComponent {
     this.listadoPokemonsUsuarios = [];
     this.equipoPokemonsUsuarios = [];
     this.pokemonBanquillo = [];
-
     await this.setUserPokemons();
     this.goToPokemonDatos(this.pokemonDatos, -1);
+    this.pokedexCargada = true;
+
   }
 }
 
