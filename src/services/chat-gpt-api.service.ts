@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class ChatGptApiService {
-  private apiKey = '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';
+  private apiKey = '';
   private sessionId = null;
 
   constructor() { }
