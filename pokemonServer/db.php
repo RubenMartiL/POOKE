@@ -4,7 +4,7 @@ class db
   const HOST = "db5012755589.hosting-data.io";
   const DBNAME = "dbs10713944";
   const USER = "dbu2405955";
-  const PASSWORD = "8AtGMQvVh97ddDJ"; // Evidentemente adapta los valores
+  const PASSWORD = ""; // Evidentemente adapta los valores
 
   static public function conexion()
   {
