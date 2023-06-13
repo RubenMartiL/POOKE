@@ -1,27 +1,28 @@
-# Pokemon
+# POOKE
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.2.
+¡Bienvenido Pooke! Juego de código abierto elaborado para un TFG, el cual se centra en las principales caracteristicas de Pokemón, el combate, la apertura de sobres y el coleccionismo de criaturas. Si alguna vez has soñado con ser un entrenador y aventurarte en un mundo lleno de desafíos y criaturas asombrosas, ¡este proyecto es para ti!
 
-## Development server
+# CARACTERISTICAS PRINCIPALES
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Combate: Sumérgete en emocionantes batallas contra otras criaturas, utilizando movimientos, habilidades y estrategias para superar a tus oponentes y convertirte en el campeón definitivo.
 
-## Code scaffolding
+Tienda: Disfruta de la emoción de abrir sobres para descubrir nuevas criaturas.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Pokedex: Colecciona una amplia variedad de Pokémon de todas las generaciones. Completa tu Pokédex y demuestra tu destreza como entrenador.
 
-## Build
+# COMO DESPLEGAR
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Clona este repositorio en tu máquina local utilizando el comando:
 
-## Running unit tests
+```git clone https://github.com/RubenMartiL/Pokemon.git```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Asegúrate de tener Node.js y Angular CLI instalados en tu sistema.
+Navega hasta el directorio del proyecto y ejecuta el siguiente comando para instalar las dependencias:
 
-## Running end-to-end tests
+```npm install```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+Una vez instaladas las dependencias, ejecuta el siguiente comando para iniciar la aplicación en un servidor local:
 
-## Further help
+```ng serve -o```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Abre tu navegador web y ve a la siguiente URL: http://localhost:4200. Ahí encontrarás Pooke listo para ser explorado y disfrutado.
